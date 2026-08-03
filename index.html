@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToonClipz — Free Toon Reveal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.1/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg: #0a0b12;
+    --panel: #12131c;
+    --panel-2: #1a1c28;
+    --hairline: #2a2c3a;
+    --blue: #3ea1ff;
+    --blue-dim: #143a5c;
+    --gold: #ffb300;
+    --gold-dim: #5c4210;
+    --red: #ff5b52;
+    --text: #f3f2f8;
+    --text-dim: #9a9bb0;
+    --text-faint: #5c5d70;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:480px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+    min-height:100vh;
+  }
+  .logo{ text-align:center; font-weight:900; font-size:1.3rem; letter-spacing:0.02em; margin-bottom:4px; }
+  .logo span{ color:var(--blue); }
+  .tagline{ text-align:center; color:var(--text-dim); font-size:0.85rem; margin-bottom:26px; }
+
+  .configwarn{
+    background:#3a1a10; border:1px solid #8a4a20; color:#ffb787;
+    border-radius:12px; padding:14px 16px; font-size:0.8rem; line-height:1.5;
+    margin-bottom:18px; display:none;
+  }
+  .configwarn.show{ display:block; }
+
+  .hero{
+    background:linear-gradient(160deg, var(--panel-2), var(--panel));
+    border:1px solid var(--hairline);
+    border-radius:18px;
+    padding:22px;
+    margin-bottom:18px;
+    text-align:center;
+  }
+  .hero h1{ font-size:1.35rem; font-weight:800; line-height:1.3; margin-bottom:8px; }
+  .hero h1 .free{ color:var(--gold); }
+  .hero p{ color:var(--text-dim); font-size:0.88rem; line-height:1.4; }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:14px;
+  }
+  label{
+    display:block; font-size:0.75rem; font-weight:800; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--text-faint); margin-bottom:8px;
+  }
+  input[type="text"]{
+    width:100%; background:var(--panel-2); border:1px solid var(--hairline);
+    border-radius:10px; padding:13px 14px; color:var(--text); font-size:1rem; margin-bottom:16px;
+  }
+  input[type="text"]:focus{ outline:none; border-color:var(--blue); }
+
+  .platform-row{ display:flex; gap:8px; margin-bottom:16px; }
+  .platform-btn{
+    flex:1; padding:11px; border-radius:10px; border:1px solid var(--hairline);
+    background:var(--panel-2); color:var(--text-dim); font-size:0.85rem; font-weight:700;
+    text-align:center; cursor:pointer;
+  }
+  .platform-btn.active{ border-color:var(--blue); color:var(--blue); background:var(--blue-dim); }
+
+  .upload-zone{
+    border:2px dashed var(--hairline); border-radius:14px; padding:28px 16px;
+    text-align:center; cursor:pointer; margin-bottom:6px; position:relative;
+  }
+  .upload-zone.has-image{ border-style:solid; border-color:var(--blue); padding:12px; }
+  .upload-zone input{ display:none; }
+  .upload-icon{ font-size:2rem; margin-bottom:8px; }
+  .upload-text{ font-size:0.9rem; font-weight:700; color:var(--text); }
+  .upload-sub{ font-size:0.75rem; color:var(--text-faint); margin-top:4px; }
+  .preview-img{ width:100%; max-height:280px; object-fit:contain; border-radius:10px; display:block; }
+  .swap-note{ text-align:center; font-size:0.75rem; color:var(--text-faint); margin-top:8px; }
+
+  .upload-status{
+    font-size:0.78rem; text-align:center; margin-top:8px; min-height:18px;
+  }
+  .upload-status.error{ color:var(--red); }
+  .upload-status.loading{ color:var(--gold); }
+
+  .heic-tip{
+    font-size:0.72rem; color:var(--text-faint); text-align:center;
+    margin-top:10px; line-height:1.5;
+  }
+
+  .submit-btn{
+    width:100%; background:var(--blue); color:#04121f; border:none; border-radius:12px;
+    padding:16px; font-size:0.95rem; font-weight:800; letter-spacing:0.03em;
+    text-transform:uppercase; cursor:pointer; margin-top:6px;
+  }
+  .submit-btn:disabled{ background:var(--panel-2); color:var(--text-faint); cursor:not-allowed; }
+  .submit-btn:active:not(:disabled){ transform:scale(0.98); }
+
+  .fine-print{ text-align:center; font-size:0.72rem; color:var(--text-faint); margin-top:14px; line-height:1.5; }
+
+  .success{ text-align:center; padding:60px 10px; display:none; }
+  .success.show{ display:block; }
+  .success .emoji{ font-size:3rem; margin-bottom:14px; }
+  .success h2{ font-size:1.3rem; font-weight:800; margin-bottom:10px; }
+  .success p{ color:var(--text-dim); font-size:0.9rem; line-height:1.5; margin-bottom:6px; }
+  .success .code{
+    display:inline-block; background:var(--panel); border:1px solid var(--blue); color:var(--blue);
+    padding:8px 16px; border-radius:8px; font-weight:800; letter-spacing:0.08em; margin:14px 0;
+  }
+
+  .formscreen{ display:block; }
+  .formscreen.hide{ display:none; }
+
+  .admin-toggle{
+    position:fixed; bottom:14px; right:14px; font-size:0.65rem; color:var(--text-faint);
+    opacity:0.4; cursor:pointer; padding:6px 10px;
+  }
+
+  .admin-wrap{ display:none; }
+  .admin-wrap.show{ display:block; }
+  .admin-item{
+    background:var(--panel); border:1px solid var(--hairline); border-radius:14px;
+    padding:14px; margin-bottom:10px; display:flex; gap:12px;
+  }
+  .admin-item img{ width:64px; height:64px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+  .admin-item .info{ flex:1; min-width:0; }
+  .admin-item .handle{ font-weight:800; font-size:0.9rem; }
+  .admin-item .meta{ color:var(--text-faint); font-size:0.72rem; margin-top:2px; }
+  .admin-item.done{ opacity:0.4; }
+  .admin-item .doneBtn{
+    background:var(--panel-2); border:1px solid var(--hairline); color:var(--text-dim);
+    border-radius:8px; padding:6px 10px; font-size:0.7rem; font-weight:700; cursor:pointer; align-self:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo">TOON<span>CLIPZ</span></div>
+  <div class="tagline">send a pic, get a free toon reveal</div>
+
+  <div class="configwarn" id="configWarn">
+    ⚠️ Supabase isn't connected yet. Open this file and fill in <b>SUPABASE_URL</b> and <b>SUPABASE_ANON_KEY</b> near the top of the script before this goes live.
+  </div>
+
+  <div id="publicView">
+    <div class="hero">
+      <h1>Upload your pic,<br>get a <span class="free">FREE</span> toon reveal</h1>
+      <p>I'll pick from live uploads on stream. Want the full animated video? That's a $25 upgrade after your free reveal.</p>
+    </div>
+
+    <div class="formscreen" id="formScreen">
+      <div class="card">
+        <label>Your Name</label>
+        <input type="text" id="nameInput" placeholder="What should I call you?">
+
+        <label>Your Handle</label>
+        <input type="text" id="handleInput" placeholder="@yourusername">
+
+        <label>Where You're Watching</label>
+        <div class="platform-row">
+          <div class="platform-btn active" data-p="TikTok" onclick="selectPlatform(this)">TikTok</div>
+          <div class="platform-btn" data-p="Instagram" onclick="selectPlatform(this)">Instagram</div>
+          <div class="platform-btn" data-p="Other" onclick="selectPlatform(this)">Other</div>
+        </div>
+
+        <label>Your Pic</label>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept="image/*,.heic,.heif" onchange="handleFile(event)">
+          <div id="uploadPrompt">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">Tap to upload a photo</div>
+            <div class="upload-sub">Any format — JPG, PNG, even iPhone HEIC</div>
+          </div>
+          <img id="previewImg" class="preview-img" style="display:none;">
+        </div>
+        <div class="swap-note" id="swapNote" style="display:none;">Tap the image to choose a different one</div>
+        <div class="upload-status" id="uploadStatus"></div>
+        <div class="heic-tip">Photo not loading? Screenshot it first, then upload the screenshot — that always works.</div>
+
+        <button class="submit-btn" id="submitBtn" disabled onclick="submitEntry()">Send It In</button>
+      </div>
+      <div class="fine-print">By submitting you're okay with your pic + the toon version being shown live on stream and posted to @toon_clipz_.</div>
+    </div>
+
+    <div class="success" id="successScreen">
+      <div class="emoji">🎉</div>
+      <h2>You're in the queue!</h2>
+      <p>Keep watching the stream — I'm picking from live uploads.</p>
+      <div class="code" id="claimCode"></div>
+      <p>Screenshot this code just in case. If I pick you, I'll call out your handle live.</p>
+    </div>
+  </div>
+
+  <div class="admin-wrap" id="adminView">
+    <div class="tagline" style="margin-bottom:16px;">Live submission queue — newest first</div>
+    <div id="adminList"></div>
+    <button class="submit-btn" style="margin-top:10px; background:var(--panel-2); color:var(--text-dim);" onclick="loadAdmin()">↻ Refresh</button>
+  </div>
+</div>
+
+<div class="admin-toggle" onclick="toggleAdmin()">·</div>
+
+<script>
+// ───────────────────────────────────────────────
+// FILL THESE IN before deploying — Supabase project
+// Settings → API in your Supabase dashboard
+// ───────────────────────────────────────────────
+const SUPABASE_URL = 'https://pamizjfazcuofekzjekm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhbWl6amZhemN1b2Zla3pqZWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjU1NTksImV4cCI6MjA5MjA0MTU1OX0.WY1FxdaZfr5g8HcUpNRWHjgT8FsDEI6IQF8ilTqlr9Y';
+const STORAGE_BUCKET = 'toonclipz-uploads';
+const ADMIN_CODE = 'rich'; // change this to whatever you want
+// ───────────────────────────────────────────────
+
+let supa = null;
+if(SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY'){
+  supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  document.getElementById('configWarn').classList.add('show');
+}
+
+let uploadedBlob = null;
+let platform = "TikTok";
+
+function selectPlatform(el){
+  document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  platform = el.dataset.p;
+}
+
+function setStatus(msg, type){
+  const el = document.getElementById('uploadStatus');
+  el.textContent = msg || '';
+  el.className = 'upload-status' + (type ? ' ' + type : '');
+}
+
+async function handleFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+
+  setStatus('Reading photo...', 'loading');
+  uploadedBlob = null;
+  checkReady();
+
+  let workingBlob = file;
+  const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || /\.(heic|heif)$/i.test(file.name);
+
+  try{
+    if(isHeic){
+      setStatus('Converting iPhone photo...', 'loading');
+      let converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+      if(Array.isArray(converted)) converted = converted[0];
+      workingBlob = converted;
+    }
+    await drawToCanvas(workingBlob);
+  }catch(err){
+    setStatus("Couldn't read that photo — try the screenshot trick below.", 'error');
+  }
+}
+
+function drawToCanvas(blob){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = function(){
+      const maxDim = 1000;
+      let w = img.width, h = img.height;
+      if(w > h && w > maxDim){ h = h * (maxDim/w); w = maxDim; }
+      else if(h > maxDim){ w = w * (maxDim/h); h = maxDim; }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      canvas.toBlob((finalBlob) => {
+        uploadedBlob = finalBlob;
+        const previewUrl = URL.createObjectURL(finalBlob);
+        document.getElementById('previewImg').src = previewUrl;
+        document.getElementById('previewImg').style.display = 'block';
+        document.getElementById('uploadPrompt').style.display = 'none';
+        document.getElementById('uploadZone').classList.add('has-image');
+        document.getElementById('swapNote').style.display = 'block';
+        setStatus('Photo ready ✓', '');
+        checkReady();
+        URL.revokeObjectURL(url);
+        resolve();
+      }, 'image/jpeg', 0.82);
+    };
+    img.onerror = () => reject(new Error('decode failed'));
+    img.src = url;
+  });
+}
+
+function checkReady(){
+  const name = document.getElementById('nameInput').value.trim();
+  const handle = document.getElementById('handleInput').value.trim();
+  document.getElementById('submitBtn').disabled = !(name && handle && uploadedBlob);
+}
+document.getElementById('nameInput').addEventListener('input', checkReady);
+document.getElementById('handleInput').addEventListener('input', checkReady);
+
+async function submitEntry(){
+  if(!supa){
+    alert('Supabase isn\'t connected yet — fill in SUPABASE_URL and SUPABASE_ANON_KEY in the file first.');
+    return;
+  }
+  const name = document.getElementById('nameInput').value.trim();
+  const handle = document.getElementById('handleInput').value.trim();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  const code = Math.random().toString(36).substring(2,6).toUpperCase();
+  const fileName = `${Date.now()}-${code}.jpg`;
+
+  try{
+    const { error: uploadErr } = await supa.storage
+      .from(STORAGE_BUCKET)
+      .upload(fileName, uploadedBlob, { contentType: 'image/jpeg' });
+    if(uploadErr) throw uploadErr;
+
+    const { data: urlData } = supa.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+    const imageUrl = urlData.publicUrl;
+
+    const { error: insertErr } = await supa.from('submissions').insert({
+      name, handle, platform, image_url: imageUrl, code, done: false
+    });
+    if(insertErr) throw insertErr;
+
+    document.getElementById('formScreen').classList.add('hide');
+    document.getElementById('claimCode').textContent = code;
+    document.getElementById('successScreen').classList.add('show');
+  }catch(err){
+    alert('Something went wrong sending your pic — check your connection and try again.');
+    console.error(err);
+    btn.disabled = false;
+    btn.textContent = 'Send It In';
+  }
+}
+
+function toggleAdmin(){
+  const pass = prompt('Admin code:');
+  if(pass !== ADMIN_CODE){ if(pass !== null) alert('Nope.'); return; }
+  document.getElementById('publicView').style.display = 'none';
+  document.getElementById('adminView').classList.add('show');
+  loadAdmin();
+}
+
+async function loadAdmin(){
+  const listEl = document.getElementById('adminList');
+  listEl.innerHTML = '<div style="color:var(--text-faint); text-align:center; padding:20px;">Loading...</div>';
+  if(!supa){
+    listEl.innerHTML = '<div style="color:var(--text-faint); text-align:center; padding:20px;">Supabase not connected.</div>';
+    return;
+  }
+  try{
+    const { data, error } = await supa.from('submissions').select('*').order('created_at', {ascending:false});
+    if(error) throw error;
+    if(!data || data.length === 0){
+      listEl.innerHTML = '<div style="color:var(--text-faint); text-align:center; padding:20px;">No submissions yet.</div>';
+      return;
+    }
+    listEl.innerHTML = '';
+    data.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'admin-item' + (d.done ? ' done' : '');
+      div.innerHTML = `
+        <img src="${d.image_url}">
+        <div class="info">
+          <div class="handle">${d.name} — ${d.handle}</div>
+          <div class="meta">${d.platform} · code ${d.code} · ${new Date(d.created_at).toLocaleTimeString()}</div>
+        </div>
+        <div class="doneBtn" onclick="markDone('${d.id}', ${!d.done})">${d.done ? 'Undo' : 'Done'}</div>
+      `;
+      listEl.appendChild(div);
+    });
+  }catch(err){
+    listEl.innerHTML = '<div style="color:var(--text-faint); text-align:center; padding:20px;">Couldn\'t load submissions.</div>';
+    console.error(err);
+  }
+}
+
+async function markDone(id, doneVal){
+  try{
+    await supa.from('submissions').update({ done: doneVal }).eq('id', id);
+    loadAdmin();
+  }catch(e){ console.error(e); }
+}
+</script>
+</body>
+</html>

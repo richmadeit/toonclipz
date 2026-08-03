@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ToonClipz Queue Preview</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  html, body{
+    margin:0; padding:0;
+    width:1032px; height:334px;
+    background:transparent;
+    font-family:"Arial Black","Arial Narrow",Arial,sans-serif;
+    overflow:hidden;
+  }
+  .panel{
+    width:100%; height:100%;
+    box-sizing:border-box;
+    background:rgba(13,13,13,0.88);
+    border:6px solid #00c2ff;
+    border-radius:18px;
+    padding:22px 28px;
+    color:#efefef;
+  }
+  .header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .dot{
+    width:16px; height:16px;
+    border-radius:50%;
+    background:#00c2ff;
+    box-shadow:0 0 14px #00c2ff;
+  }
+  .header-text{
+    font-size:26px;
+    letter-spacing:0.04em;
+    color:#00c2ff;
+  }
+  .count{
+    margin-left:auto;
+    font-size:20px;
+    color:#ffb300;
+  }
+  .now{
+    background:rgba(0,42,56,0.9);
+    border:3px solid #ffb300;
+    border-radius:12px;
+    padding:14px 20px;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .now-label{
+    font-size:16px;
+    color:#ffb300;
+    letter-spacing:0.05em;
+  }
+  .now-handle{
+    font-size:30px;
+    color:#ffffff;
+  }
+  .upnext-label{
+    font-size:15px;
+    color:#8a8a8a;
+    letter-spacing:0.05em;
+    margin-bottom:8px;
+  }
+  .upnext-list{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .chip{
+    background:rgba(255,255,255,0.06);
+    border:2px solid #3a3a3a;
+    border-radius:20px;
+    padding:8px 18px;
+    font-size:19px;
+    color:#dddddd;
+  }
+  .empty{
+    font-size:22px;
+    color:#888888;
+    padding:20px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="header">
+    <div class="dot"></div>
+    <div class="header-text">TOON QUEUE</div>
+    <div class="count" id="countLabel"></div>
+  </div>
+  <div id="content">
+    <div class="empty">Loading queue…</div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://pamizjfazcuofekzjekm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhbWl6amZhemN1b2Zla3pqZWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjU1NTksImV4cCI6MjA5MjA0MTU1OX0.WY1FxdaZfr5g8HcUpNRWHjgT8FsDEI6IQF8ilTqlr9Y';
+
+let supa = null;
+if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+  supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+function displayNameFor(row){
+  if (row.handle && row.handle.trim()) {
+    const h = row.handle.trim();
+    return h.startsWith('@') ? h : '@' + h;
+  }
+  if (row.name && row.name.trim()) return row.name.trim();
+  return 'Someone';
+}
+
+async function refreshQueue(){
+  const content = document.getElementById('content');
+  const countLabel = document.getElementById('countLabel');
+
+  if (!supa) {
+    content.innerHTML = '<div class="empty">⚠️ Add SUPABASE_URL and SUPABASE_ANON_KEY at the top of this file</div>';
+    return;
+  }
+
+  try {
+    const { data, error } = await supa
+      .from('submissions')
+      .select('name, handle, done, created_at')
+      .eq('done', false)
+      .order('created_at', { ascending: true })
+      .limit(6);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      countLabel.textContent = '';
+      content.innerHTML = '<div class="empty">Queue\u2019s empty \u2014 upload your photo now to jump in! \ud83d\udc47</div>';
+      return;
+    }
+
+    countLabel.textContent = data.length + (data.length === 1 ? ' IN LINE' : ' IN LINE');
+
+    const [now, ...rest] = data;
+    let html = '';
+    html += '<div class="now"><div class="now-label">NOW TOON-ING</div><div class="now-handle">' +
+            displayNameFor(now) + '</div></div>';
+
+    if (rest.length > 0) {
+      html += '<div class="upnext-label">UP NEXT</div><div class="upnext-list">';
+      rest.forEach(row => {
+        html += '<div class="chip">' + displayNameFor(row) + '</div>';
+      });
+      html += '</div>';
+    }
+
+    content.innerHTML = html;
+  } catch (err) {
+    console.error(err);
+    content.innerHTML = '<div class="empty">Couldn\u2019t load the queue \u2014 retrying\u2026</div>';
+  }
+}
+
+refreshQueue();
+setInterval(refreshQueue, 8000);
+</script>
+
+</body>
+</html>
