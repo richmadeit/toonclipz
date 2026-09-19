@@ -1,11 +1,11 @@
 /* ToonClipz TikTok Pixel, 2026-09-19.
- * Pixel: C2MS7R9HGMGT4CUK7KMG. PageView + successful SubmitForm only.
+ * Pixel: DAN48FRC77U1ARFV6OF0. PageView + successful Lead (formerly SubmitForm) only.
  * Loaded by index.html AFTER its existing Supabase submission handler.
  * Keep form uploads, database schema, admin routing, offer and Meta events intact.
  */
 (() => {
   'use strict';
-  const PIXEL_ID = 'C2MS7R9HGMGT4CUK7KMG';
+  const PIXEL_ID = 'DAN48FRC77U1ARFV6OF0';
   if (window.__toonclipzTikTokInstalled) return;
   window.__toonclipzTikTokInstalled = true;
   const submittedRefs = new Set();
@@ -19,7 +19,7 @@
       try { result = originalLead.apply(this, arguments); }
       catch (_) { console.warn('[ToonClipz tracking] Existing lead tracker unavailable; application is saved.'); }
       // This function is called only AFTER the successful database insert in index.html.
-      // Do not bind SubmitForm to an Apply click, form submit attempt, or receipt display.
+      // Do not bind Lead to an Apply click, form submit attempt, or receipt display.
       if (typeof ref !== 'string' || !/^RMI-[A-Z2-9]{5}$/.test(ref) || submittedRefs.has(ref) || !adsAllowed()) return result;
       try {
         const pixel = window.ttq;
@@ -27,7 +27,8 @@
           submittedRefs.add(ref);
           // No email, phone, artist name, filenames, song, lyrics, or creative idea.
           // No purchase or $20 value: this is a free application, not a payment.
-          pixel.track('SubmitForm');
+          // Lead is TikTok's current name for SubmitForm; send only one event.
+          pixel.track('Lead');
         }
       } catch (_) { console.warn('[ToonClipz tracking] TikTok unavailable; application is saved.'); }
       return result;
