@@ -1,85 +1,62 @@
-# ToonClipz Live Tools
+# ToonClipz
 
-Everything needed to run the live "upload your photo, get a free toon" flow:
-a submission page for viewers, a queue widget for OBS, and the Supabase
-backend that connects them.
+The homepage is the recovered ToonClipz music-video campaign: apply free,
+review a watermarked 15-second preview if selected, and pay $20 to unlock
+that exact clip. No payment is collected by the application form.
 
-## Files
+## Routes
 
-| File | What it's for |
-|---|---|
-| `index.html` | The viewer-facing upload page. This is your "link in bio." |
-| `queue.html` | Live queue preview — add as an OBS Browser Source so chat can see who's up next. |
-| `supabase-setup.sql` | Creates the database table + storage policies. Run once. |
-| `obs-assets/stream-layout-vicecity.png` | Today's stream background — load as an OBS Image Source, not part of the website. |
+| Path | Purpose |
+| --- | --- |
+| `/` | ToonClipz campaign and artist application |
+| Portfolio videos | Existing media hosted at `https://richmadeit.netlify.app/preview/` |
+| `/admin.html`, `/queue.html` | Existing legacy live-giveaway tools; these do not receive campaign applications |
 
-## 1. Set up Supabase (one-time)
+The old free-reveal homepage has been replaced. There is no `/live/` copy.
+The old homepage remains recoverable through Git history.
 
-1. Go to your Supabase project → **Storage** → **New bucket**
-   - Name it exactly `toonclipz-uploads`
-   - Toggle **Public** ON
-2. Go to the **SQL Editor** → paste in the contents of `supabase-setup.sql` → Run
-3. Go to **Settings → API** and copy two values:
-   - **Project URL**
-   - **anon public key**
+## Recovery source
 
-## 2. Add your Supabase credentials
+Recovered from `preview/index.html` in `richmadeit/richmadeit-submissions`
+at commit `357e0b9161ac9132551b6821cc42c58749be1ded`.
+That repository's standard preview was restored in commit
+`6716118478e69f726788e1000d670e9c52ad785f`; this recovery changes only
+`richmadeit/toonclipz`.
 
-Open both `index.html` and `queue.html` in a text editor. Near the top of the
-`<script>` section in each, replace:
+The dedicated homepage renders ToonClipz branding and selects Cinematic
+Toon without query parameters. Purchase intent and permissions remain
+unchecked. Campaign attribution is always `toonclipz`, including visits
+with unrelated advertising query parameters. Other recovered look options
+remain available.
 
-```js
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-```
+## Applications and admin
 
-with the two values from step 1. Same two values, pasted into both files.
+The campaign uses the existing RichMadeIt Supabase project
+`molqlfdjlmnlkscecngz`, the `submissions` storage bucket, and the
+`submissions` table. Review these applications in the existing
+[RichMadeIt admin](https://richmadeit.netlify.app/admin/).
 
-> The anon key is meant to be public/client-side — that's how Supabase is
-> designed. The RLS policies in `supabase-setup.sql` are what actually control
-> access. This setup is fine for a casual public giveaway; don't reuse this
-> exact open-access pattern for anything sensitive later.
+The recovered database contract is preserved: Cinematic Toon is stored as
+`style: realistic`, with the explicit requested look and `Source: toonclipz`
+in the contact field. This requires no schema migration. Tracking includes
+the `cinematic_toon` variant; the Lead event fires only after a successful
+database insert. Contact details and optional permissions follow the
+recovered form's existing rules.
 
-## 3. Push to GitHub
+The old `supabase-setup.sql` belongs only to the legacy giveaway backend
+(`pamizjfazcuofekzjekm`). Do not run it against the RichMadeIt project for
+this campaign. The existing legacy admin, queue, and OBS assets are retained.
 
-From inside this folder:
+## Hosting
 
-```bash
-git init
-git add .
-git commit -m "Initial commit — ToonClipz live tools"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/toonclipz-live.git
-git push -u origin main
-```
+This is a static site: publish the repository root, with no build command.
+Portfolio videos use absolute URLs to the existing RichMadeIt media; posters
+are embedded. This avoids duplicating the videos and does not change the
+standard preview page. Keep those five media URLs available when updating
+the RichMadeIt site.
+Free-lesson links point to the existing
+[RichMadeIt University](https://richmadeit.netlify.app/university/).
 
-(Create the empty repo on github.com first, then use its URL in the
-`remote add` line above.)
-
-## 4. Deploy on Netlify (connected to GitHub)
-
-1. netlify.com → **Add new site → Import an existing project**
-2. Connect GitHub → select this repo
-3. Build command: leave blank. Publish directory: leave as `/` (root)
-4. Deploy
-
-From now on, any `git push` to `main` auto-redeploys the live site — no
-manual drag-and-drop needed.
-
-Your live URL (e.g. `https://toonclipz.netlify.app`) is what goes in your
-TikTok bio.
-
-## 5. OBS setup for tonight
-
-- **Background:** Image Source → `obs-assets/stream-layout-vicecity.png` → full 1080×1920 canvas
-- **Queue widget:** Browser Source → your live `queue.html` URL (e.g. `https://toonclipz.netlify.app/queue.html`) → size **1032 × 334** → position inside "THE PROMPTS" zone
-- **Admin queue (for you only):** on `index.html`, tap the small dot bottom-right, enter code `rich` (change `ADMIN_CODE` in `index.html` if you want a different one)
-
-## Notes
-
-- Full-size finished files: still handled manually — you send them yourself
-  once someone pays. No pricing is shown anywhere on the site or the stream
-  background by design.
-- If you ever want the old scrolling-ticker overlay back, it's not part of
-  this repo, but the concept still works the same way as `queue.html` does
-  (a small transparent Browser Source layered on top of the background).
+For a local preview, run `python3 -m http.server 8000` from this directory.
+When checking the form, mock the Supabase client to avoid creating test
+applications in the production queue.
