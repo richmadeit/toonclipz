@@ -1,0 +1,20 @@
+(() => {
+  const slider=document.getElementById('revealSlider');
+  const layer=document.getElementById('beforeLayer');
+  const divider=document.getElementById('divider');
+  const reveal=value=>{const v=Math.max(0,Math.min(100,Number(value)));slider.value=v;layer.style.clipPath=`inset(0 ${100-v}% 0 0)`;divider.style.left=v+'%';slider.setAttribute('aria-valuetext',v+' percent photo');document.querySelectorAll('[data-reveal]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.reveal)===v?'true':'false'));};
+  slider.addEventListener('input',()=>reveal(slider.value));
+  document.querySelectorAll('[data-reveal]').forEach(b=>b.addEventListener('click',()=>reveal(b.dataset.reveal)));
+  reveal(slider.value);
+  const video=document.getElementById('showreel');
+  const status=document.getElementById('videoStatus');
+  const fallback=()=>{status.textContent='Having trouble playing? Open the video below.';document.querySelector('.video-fallback').hidden=false;};
+  video.addEventListener('error',fallback);video.querySelector('source').addEventListener('error',fallback);
+  video.addEventListener('play',()=>{status.textContent='Now playing · Full 15-second example';if(typeof audioEl!=='undefined'&&audioEl)audioEl.pause();});
+  video.addEventListener('ended',()=>{status.textContent='Your song could be next. Apply below.';});
+  document.getElementById('pbtn').addEventListener('click',()=>video.pause());
+  const form=document.getElementById('f');
+  form.addEventListener('submit',()=>video.pause());
+  const receipt=document.getElementById('receipt');
+  new MutationObserver(()=>{if(receipt.style.display==='block')document.querySelector('.mobile-cta').hidden=true;}).observe(receipt,{attributes:true,attributeFilter:['style']});
+})();
