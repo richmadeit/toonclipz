@@ -1,3 +1,63 @@
+/* ToonClipz TikTok Pixel, 2026-09-19.
+ * Pixel: C2MS7R9HGMGT4CUK7KMG. PageView + successful SubmitForm only.
+ * Loaded by index.html AFTER its existing Supabase submission handler.
+ * Keep form uploads, database schema, admin routing, offer and Meta events intact.
+ */
+(() => {
+  'use strict';
+  const PIXEL_ID = 'C2MS7R9HGMGT4CUK7KMG';
+  if (window.__toonclipzTikTokInstalled) return;
+  window.__toonclipzTikTokInstalled = true;
+  const submittedRefs = new Set();
+  const adsAllowed = () => window.navigator.globalPrivacyControl !== true && window.toonclipzTikTokConsent !== false;
+
+  // Analytics failures must never turn a saved application into an error/retry.
+  const originalLead = window.rmiTrackSuccessfulLead;
+  if (typeof originalLead === 'function') {
+    window.rmiTrackSuccessfulLead = function (ref) {
+      let result;
+      try { result = originalLead.apply(this, arguments); }
+      catch (_) { console.warn('[ToonClipz tracking] Existing lead tracker unavailable; application is saved.'); }
+      // This function is called only AFTER the successful database insert in index.html.
+      // Do not bind SubmitForm to an Apply click, form submit attempt, or receipt display.
+      if (typeof ref !== 'string' || !/^RMI-[A-Z2-9]{5}$/.test(ref) || submittedRefs.has(ref) || !adsAllowed()) return result;
+      try {
+        const pixel = window.ttq;
+        if (pixel && typeof pixel.track === 'function' && pixel._i && pixel._i[PIXEL_ID]) {
+          submittedRefs.add(ref);
+          // No email, phone, artist name, filenames, song, lyrics, or creative idea.
+          // No purchase or $20 value: this is a free application, not a payment.
+          pixel.track('SubmitForm');
+        }
+      } catch (_) { console.warn('[ToonClipz tracking] TikTok unavailable; application is saved.'); }
+      return result;
+    };
+  } else {
+    console.warn('[ToonClipz tracking] Successful-save callback missing; no lead trigger installed.');
+  }
+  const originalBuild = window.rmiTrackBuildClick;
+  if (typeof originalBuild === 'function') {
+    window.rmiTrackBuildClick = function () {
+      try { return originalBuild.apply(this, arguments); }
+      catch (_) { console.warn('[ToonClipz tracking] Existing click tracker unavailable; continuing submission.'); }
+    };
+  }
+
+  // Honor browser GPC and an explicit denial supplied by a consent manager.
+  // Never infer advertising consent from application/contact/showcase permissions.
+  if (!adsAllowed()) return;
+  try {
+    if (!(window.ttq && window.ttq._i && window.ttq._i[PIXEL_ID])) {
+      // TikTok base code supplied by the site owner (same SDK and pixel ID).
+      !function (w, d, t) {
+        w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js',o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript',n.async=!0,n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};
+        ttq.load(PIXEL_ID);
+        ttq.page();
+      }(window, document, 'ttq');
+    }
+  } catch (_) { console.warn('[ToonClipz tracking] TikTok base unavailable; website remains usable.'); }
+})();
+
 /* ToonClipz results, 2026-09-19. No changes to intake, payment, or tracking. */
 (() => {
   'use strict';
