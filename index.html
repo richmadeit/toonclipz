@@ -128,7 +128,7 @@ button.go{width:100%;background:var(--gold);color:#0d0b07;border:0;border-radius
   font-family:'Space Grotesk',sans-serif;font-weight:600;text-transform:uppercase;font-size:19px;
   letter-spacing:.05em;padding:19px;cursor:pointer}
 button.go:disabled{background:var(--panel-2);color:#5a5560;cursor:not-allowed}
-.bar{height:3px;background:var(--panel-2);margin-top:14px;display:none}
+.bar{height:3px;background:var(--line);margin-top:14px;display:none}
 .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .25s}
 .msg{margin-top:14px;font-size:15px;color:var(--alert);min-height:1.3em}
 
@@ -136,7 +136,7 @@ button.go:disabled{background:var(--panel-2);color:#5a5560;cursor:not-allowed}
 .receipt h2{font-family:'Space Grotesk',sans-serif;font-weight:600;text-transform:uppercase;font-size:31px;margin:0 0 6px}
 .receipt .id{font-family:ui-monospace,Menlo,monospace;font-size:29px;color:var(--gold);
   letter-spacing:.1em;margin:26px 0 6px}
-.receipt .idl{color:var(--muted);font-size:14px;margin:0 0 30px}
+.receipt .idl{color:var(--muted);font-size:13.5px;margin:0 0 30px}
 .receipt p{color:var(--muted);max-width:40ch;margin:0 auto 12px}
 
 
@@ -238,11 +238,12 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
     <div id="applicationBody" hidden>
     <section class="block" id="eligibility">
       <h2>1. Get your materials ready</h2>
-      <p class="why">A finished song and 3–5 clear images of the same artist are all you need to start. Real artists and existing AI characters are welcome.</p>
+      <p class="why">A TikTok profile, a finished song and 3–5 clear images of the same artist are all you need to start. Real artists and existing AI characters are welcome.</p>
       <label class="check"><input type="checkbox" id="eligible"><span>I have permission to use the song and images, and to have the person or character shown in this AI video.</span></label>
-      <label for="artistProfile">Artist page or music profile <span class="mini">optional</span></label>
-      <input type="text" id="artistProfile" inputmode="url" maxlength="500" autocomplete="url" placeholder="instagram.com/yourartistname" aria-describedby="artistProfileHint">
-      <p class="hint" id="artistProfileHint">New artist? You can leave this blank. Your follower count does not decide whether your video gets made.</p>
+      <label for="artistProfile">TikTok page <span class="req">required</span></label>
+      <input type="text" id="artistProfile" inputmode="url" maxlength="500" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="https://www.tiktok.com/@yourusername" required aria-required="true" aria-describedby="artistProfileHint artistProfileError">
+      <p class="hint" id="artistProfileHint">Paste your TikTok profile link so RichMadeIt can review your page. Use tiktok.com/@yourusername, not a video or shortened share link. Your follower count does not decide whether your preview gets made.</p>
+      <p class="hint" id="artistProfileError" style="color:var(--alert)" aria-live="polite" hidden></p>
     </section>
     <div class="tally" id="tally"><span class="n" id="tallyn">0 of 9</span><span>application requirements complete</span></div>
 
@@ -329,7 +330,7 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
       <textarea id="creativeIdea" maxlength="240" placeholder="For example: your cartoon character in a new outfit, a neon city, or a rooftop performance. Or let RichMadeIt direct it."></textarea>
       <p class="hint">One 15-second cartoon concept, directed by RichMadeIt. $20 unlocks the exact preview shown; changes are quoted separately. No obligation to buy.</p>
       <fieldset class="intent-options"><legend>Can I feature your project? <span class="mini">Optional — neither is required for a preview.</span></legend>
-        <label class="check"><input type="checkbox" id="showcaseOK"><span>I permit RichMadeIt to show the finished clip, artist name and submitted artist profile on ToonClipz and RichMadeIt’s public social pages and portfolios. This does not include paid ads or raw file downloads.</span></label>
+        <label class="check"><input type="checkbox" id="showcaseOK"><span>I permit RichMadeIt to show the finished clip, artist name and submitted TikTok page on ToonClipz and RichMadeIt’s public social pages and portfolios. This does not include paid ads or raw file downloads.</span></label>
         <label class="check"><input type="checkbox" id="teachingOK"><span>I permit RichMadeIt University to show this clip and its creation process, using excerpts of my submitted song and images, in free tutorials and paid lessons. Do not include my contact details or redistribute my source files.</span></label>
       </fieldset>
       <p class="hint">Only grant permission for material you own or are authorized to license. If neither box is checked, your application stays private.</p>
@@ -574,26 +575,48 @@ function validPhone(){
   const digits=raw.replace(/\D/g,"");
   return !raw || (digits.length>=10 && digits.length<=15);
 }
+// The field keeps its existing ID and the saved Artist profile key for admin compatibility.
+// This checks the link format, not account ownership or whether the applicant is human.
 function artistProfileUrl(){
   const raw = $("artistProfile").value.trim();
-  if(!raw || /\s/.test(raw)) return "";
+  if(!raw || raw.length>500 || /[\s\\\u0000-\u001f\u007f]/.test(raw)) return "";
   try {
     const u = new URL(/^https?:\/\//i.test(raw) ? raw : "https://"+raw);
-    const host=u.hostname.toLowerCase();
     if(!["http:","https:"].includes(u.protocol) || u.username || u.password || u.port) return "";
-    if(!host.includes(".") || host.endsWith(".local") || host==="localhost" || /^\d+(\.\d+){3}$/.test(host)) return "";
-    return u.href;
+    if(!["tiktok.com","www.tiktok.com","m.tiktok.com"].includes(u.hostname.toLowerCase())) return "";
+    const profile = u.pathname.match(/^\/@([A-Za-z0-9_.]+)\/?$/);
+    if(!profile || !/[A-Za-z0-9_]/.test(profile[1]) || profile[1].endsWith(".")) return "";
+    // Store a clean HTTPS profile link, without share parameters or fragments.
+    return "https://www.tiktok.com/@"+profile[1];
   } catch { return ""; }
+}
+function validateArtistProfile(showError=false){
+  const field=$("artistProfile"), error=$("artistProfileError");
+  const valid=!!artistProfileUrl();
+  const message=valid ? "" : !field.value.trim()
+    ? "Your TikTok page is required. Paste your profile link to continue."
+    : "Use a TikTok profile link like https://www.tiktok.com/@yourusername — not a video, short share link or another website.";
+  field.setCustomValidity(message);
+  error.textContent=showError ? message : "";
+  error.hidden=!showError || valid;
+  if(showError && !valid) field.setAttribute("aria-invalid","true");
+  else field.removeAttribute("aria-invalid");
+  return valid;
 }
 function tally(){
   const songOK = !!song;
-  const ok = [ !$("artistProfile").value.trim() || !!artistProfileUrl(), validEmail(), validPhone(), photos.length>=3, songOK, checkWindow(), $("name").value.trim().length>0, $("eligible").checked, $("intentReady").checked && $("contactOK").checked ];
+  const profileOK=validateArtistProfile($("artistProfile").dataset.touched==="true");
+  const ok = [ profileOK, validEmail(), validPhone(), photos.length>=3, songOK, checkWindow(), $("name").value.trim().length>0, $("eligible").checked, $("intentReady").checked && $("contactOK").checked ];
   const n = ok.filter(Boolean).length;
   $("tallyn").textContent = n+" of "+ok.length;
   $("tally").classList.toggle("done", n===ok.length);
   $("go").disabled = submitting || n!==ok.length;
   return n===ok.length;
 }
+["input","change","blur"].forEach(event=>$("artistProfile").addEventListener(event,()=>{
+  $("artistProfile").dataset.touched="true";
+  tally();
+}));
 
 ["eligible","contactOK"].forEach(id=>$(id).addEventListener("change",tally));
 document.querySelectorAll('input[name="purchaseIntent"]').forEach(r=>r.addEventListener("change",()=>{
@@ -617,7 +640,7 @@ zone("adrop","ain",files=>{
   song=f; $("msg").textContent=""; drawSong(); tally(); loadWave(f);
 });
 ["ts","te"].forEach(id=>$(id).addEventListener("input",e=>{ fmtTC(e.target); if(checkWindow()){winStart=toSec($("ts").value);placeSel();} tally(); }));
-["email","phone","name","artistProfile"].forEach(id=>$(id).addEventListener("input",tally));
+["email","phone","name"].forEach(id=>$(id).addEventListener("input",tally));
 
 
 /* ============================================================
@@ -669,7 +692,13 @@ const clean=n=>n.replace(/[^a-zA-Z0-9._-]/g,"_");
 
 $("f").addEventListener("submit", async e=>{
   e.preventDefault();
-  if(submitting || !tally()) return;
+  if(submitting) return;
+  $("artistProfile").dataset.touched="true";
+  if(!tally()){
+    if(!artistProfileUrl()) $("artistProfile").focus();
+    return;
+  }
+  const tiktokProfile=artistProfileUrl();
   if(!sb){$("msg").textContent="The upload service could not load. Refresh the page and try again.";return;}
   submitting=true;
 
@@ -703,7 +732,7 @@ $("f").addEventListener("submit", async e=>{
     const {error:ie}=await sb.from("submissions").insert({
       ref:id,
       artist_name:$("name").value.trim(),
-      contact:`Email: ${$("email").value.trim()} | Phone: ${$("phone").value.trim()} | Artist profile: ${artistProfileUrl() || "not supplied"} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | $20 purchase intent: yes if satisfied (not payment) | Materials permission: confirmed | Application contact: agreed | Public showcase permission: ${$("showcaseOK").checked ? "YES" : "NO"} | Free/paid teaching permission: ${$("teachingOK").checked ? "YES" : "NO"} | Consent version: toonclipz-preview-2026-09-19 | Consent recorded: ${new Date().toISOString()} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: pending`,
+      contact:`Email: ${$("email").value.trim()} | Phone: ${$("phone").value.trim()} | Artist profile: ${tiktokProfile} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | $20 purchase intent: yes if satisfied (not payment) | Materials permission: confirmed | Application contact: agreed | Public showcase permission: ${$("showcaseOK").checked ? "YES" : "NO"} | Free/paid teaching permission: ${$("teachingOK").checked ? "YES" : "NO"} | Consent version: toonclipz-preview-2026-09-19 | Consent recorded: ${new Date().toISOString()} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: pending`,
       photo_paths:photoPaths,
       song_path:songPath,
       song_url: null,
