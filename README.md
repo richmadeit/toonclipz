@@ -60,3 +60,13 @@ Free-lesson links point to the existing
 For a local preview, run `python3 -m http.server 8000` from this directory.
 When checking the form, mock the Supabase client to avoid creating test
 applications in the production queue.
+
+## Interactive landing-page update
+
+The homepage now includes a keyboard/touch photo-to-toon reveal (`toon.js`), a responsive cream/purple toon design (`toon.css`), and the complete 15-second DDG fan-concept example in `assets/toonclipz-example.mp4`. The example is labeled as AI animation with no affiliation or endorsement. The existing artist portfolio remains available in an expandable section.
+
+The offer remains: apply free, preview if selected, $20 to unlock the exact clean 15-second clip. New concepts, revisions and longer clips are separate. Applications retain the same questions, upload bucket and table, record Source: toonclipz plus sanitized utm_source/utm_campaign, and appear in RichMadeIt's admin. Optional showcase and teaching permissions are not preselected. ToonClipz uses its existing Meta pixel 993108543300382; no TikTok tracking has been added in this update.
+
+The RichMadeIt admin update displays source, requested look, creative idea and permissions, includes these in the copied/downloaded brief, and uses the $20/15-second email and SMS templates for ToonClipz applications. Messages are not sent automatically.
+
+Validation: JavaScript syntax, mocked submission success/failure/retry, duplicate-submit prevention, accurate 15-second selection, source and consent preservation, admin metadata parsing, and media duration. No production test application was submitted. Browser rendering was not verified because the browser installation could not complete.
