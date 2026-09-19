@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+.netlify/
+RBI_OWNER_SETUP_KEEP_PRIVATE/
+owner-private/
+private-content/
+*KEEP_PRIVATE*.zip
+*KEEP-PRIVATE*.sql
