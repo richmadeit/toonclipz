@@ -325,16 +325,10 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
     </section>
 
     <section class="block">
-      <h2>7. Your direction &amp; permission</h2>
+      <h2>7. Your direction</h2>
       <label for="creativeIdea">One idea or mood <span class="mini">optional</span></label>
       <textarea id="creativeIdea" maxlength="240" placeholder="For example: your cartoon character in a new outfit, a neon city, or a rooftop performance. Or let RichMadeIt direct it."></textarea>
       <p class="hint">One 15-second cartoon concept, directed by RichMadeIt. $20 unlocks the exact preview shown; changes are quoted separately. No obligation to buy.</p>
-      <fieldset class="intent-options"><legend>Can I feature your project? <span class="mini">Optional — neither is required for a preview.</span></legend>
-        <label class="check"><input type="checkbox" id="showcaseOK"><span>I permit RichMadeIt to show the finished clip, artist name and submitted TikTok page on ToonClipz and RichMadeIt’s public social pages and portfolios. This does not include paid ads or raw file downloads.</span></label>
-        <label class="check"><input type="checkbox" id="teachingOK"><span>I permit RichMadeIt University to show this clip and its creation process, using excerpts of my submitted song and images, in free tutorials and paid lessons. Do not include my contact details or redistribute my source files.</span></label>
-      </fieldset>
-      <p class="hint">Only grant permission for material you own or are authorized to license. If neither box is checked, your application stays private.</p>
-      <label class="check"><input type="checkbox" id="contactOK"><span>RichMadeIt may contact me by text or email about this application. I understand that applications are reviewed and preview creation is not guaranteed.</span></label>
       <details><summary>What happens after I apply?</summary><p>RichMadeIt reviews your artist and materials. If selected, you receive a watermarked 15-second preview and payment instructions. Pay $20 to receive the clean 15-second video after payment confirmation. Cash App, Zelle and Apple Pay are accepted. Any additional work is quoted separately.</p></details>
       <details><summary>What if the preview isn’t right for me?</summary><p>You can decline to purchase. The watermarked preview lets you assess the result before paying. Selection does not include unlimited revisions.</p></details>
     </section>
@@ -352,11 +346,11 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
     <div class="id" id="rid"></div>
     <p class="idl">Your reference — screenshot this</p>
     <p>Keep your reference number for payment and delivery questions.</p>
-    <p id="permissionReceipt"></p>
+    <p id="lookReceipt"></p>
     <a class="apply-link" href="https://richmadeit.netlify.app/university/">Watch free lessons while you wait</a>
   </section>
 
-<footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.<br>A RichMadeIt service.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="mailto:rich.madeit3@gmail.com">Contact</a><p class="fine">Your photos and song are used to review and create your requested preview. Public showcase and teaching are separate, optional permissions in the form. No automatic charge. AI likeness and motion can vary.</p></footer></div>
+<footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.<br>A RichMadeIt service.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="mailto:rich.madeit3@gmail.com">Contact</a><p class="fine">Your photos and song are used to review and create your requested preview. No automatic charge. AI likeness and motion can vary.</p></footer></div>
 <div class="mobile-cta"><span>15 seconds. <b>$20 to unlock.</b></span><a href="#previewIntent">Apply free ↗</a></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -606,7 +600,7 @@ function validateArtistProfile(showError=false){
 function tally(){
   const songOK = !!song;
   const profileOK=validateArtistProfile($("artistProfile").dataset.touched==="true");
-  const ok = [ profileOK, validEmail(), validPhone(), photos.length>=3, songOK, checkWindow(), $("name").value.trim().length>0, $("eligible").checked, $("intentReady").checked && $("contactOK").checked ];
+  const ok = [ profileOK, validEmail(), validPhone(), photos.length>=3, songOK, checkWindow(), $("name").value.trim().length>0, $("eligible").checked, $("intentReady").checked ];
   const n = ok.filter(Boolean).length;
   $("tallyn").textContent = n+" of "+ok.length;
   $("tally").classList.toggle("done", n===ok.length);
@@ -618,7 +612,7 @@ function tally(){
   tally();
 }));
 
-["eligible","contactOK"].forEach(id=>$(id).addEventListener("change",tally));
+$("eligible").addEventListener("change",tally);
 document.querySelectorAll('input[name="purchaseIntent"]').forEach(r=>r.addEventListener("change",()=>{
   $("applicationBody").hidden=!$("intentReady").checked;
   $("explorePath").hidden=!$("intentExplore").checked;
@@ -732,7 +726,7 @@ $("f").addEventListener("submit", async e=>{
     const {error:ie}=await sb.from("submissions").insert({
       ref:id,
       artist_name:$("name").value.trim(),
-      contact:`Email: ${$("email").value.trim()} | Phone: ${$("phone").value.trim()} | Artist profile: ${tiktokProfile} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | $20 purchase intent: yes if satisfied (not payment) | Materials permission: confirmed | Application contact: agreed | Public showcase permission: ${$("showcaseOK").checked ? "YES" : "NO"} | Free/paid teaching permission: ${$("teachingOK").checked ? "YES" : "NO"} | Consent version: toonclipz-preview-2026-09-19 | Consent recorded: ${new Date().toISOString()} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: pending`,
+      contact:`Email: ${$("email").value.trim()} | Phone: ${$("phone").value.trim()} | Artist profile: ${tiktokProfile} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | $20 purchase intent: yes if satisfied (not payment) | Materials permission: confirmed | Application contact: not collected | Public showcase permission: NO | Free/paid teaching permission: NO | Permissions collection: showcase, teaching and contact not requested | Consent version: toonclipz-preview-2026-09-19-no-feature-consent | Consent recorded: ${new Date().toISOString()} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: pending`,
       photo_paths:photoPaths,
       song_path:songPath,
       song_url: null,
@@ -749,7 +743,7 @@ $("f").addEventListener("submit", async e=>{
     go.textContent="Application received";
     bar.style.display="none";
     $("rid").textContent=id;
-    $("permissionReceipt").textContent="Your look: " + selectedStyleName() + ". Your choices — public showcase: " + ($("showcaseOK").checked ? "yes" : "no") + "; free/paid teaching: " + ($("teachingOK").checked ? "yes" : "no") + ".";
+    $("lookReceipt").textContent="Your look: " + selectedStyleName() + ".";
     $("receipt").style.display="block";
     const receipt = $("receipt");
     receipt.setAttribute("tabindex","-1");
@@ -770,6 +764,6 @@ $("f").addEventListener("submit", async e=>{
 
 tally();
 </script>
-<script src="toon.js?v=20260919-cartoon-only"></script>
+<script src="toon.js?v=20260919-permissions-removed"></script>
 </body>
 </html>
