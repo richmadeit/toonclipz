@@ -11,6 +11,14 @@ that exact clip. No payment is collected by the application form.
 | `/` | ToonClipz campaign and artist application |
 | Portfolio videos | Existing media hosted at `https://richmadeit.netlify.app/preview/` |
 | `/admin.html`, `/queue.html` | Existing legacy live-giveaway tools; these do not receive campaign applications |
+| `/rich-buys-iphone/` | Separate repair-chip preorder storefront |
+| `/rich-buys-iphone/admin.html` | Separate chip-order dashboard |
+| `/rich-buys-iphone/track.html` | Private chip-order status |
+
+The chip add-on is documented in [docs/rich-buys-iphone.md](docs/rich-buys-iphone.md).
+It does not change ToonClipz applications or their admin destination.
+Chip preorders remain closed until the private account/database setup is complete.
+Do not upload the paid prompt pack or owner-only setup ZIP to this public repository.
 
 The old free-reveal homepage has been replaced. There is no `/live/` copy.
 The old homepage remains recoverable through Git history.
@@ -49,7 +57,13 @@ this campaign. The existing legacy admin, queue, and OBS assets are retained.
 
 ## Hosting
 
-This is a static site: publish the repository root, with no build command.
+Use `netlify.toml`: build with `node scripts/build-site.mjs` and publish
+`dist/`. The build copies the existing public ToonClipz pages, `toon.css`,
+`toon.js`, `assets/`, and `obs-assets/`, plus `/rich-buys-iphone/`.
+It excludes the chip server code, SQL, tests, and owner-only material.
+Netlify builds the namespaced chip function separately. This replaces the
+old root-publish/no-build setting; no npm dependencies are required.
+
 Portfolio videos use absolute URLs to the existing RichMadeIt media; posters
 are embedded. This avoids duplicating the videos and does not change the
 standard preview page. Keep those five media URLs available when updating
@@ -57,16 +71,17 @@ the RichMadeIt site.
 Free-lesson links point to the existing
 [RichMadeIt University](https://richmadeit.netlify.app/university/).
 
-For a local preview, run `python3 -m http.server 8000` from this directory.
-When checking the form, mock the Supabase client to avoid creating test
-applications in the production queue.
+For a local static preview, build first, then serve `dist/`.
+When checking the ToonClipz form, mock the Supabase client to avoid creating
+test applications in the production queue. Static serving does not start
+the chip API. See the add-on setup guide for its required private services.
 
 ## Interactive landing-page update
 
-The homepage now includes a keyboard/touch photo-to-toon reveal (`toon.js`), a responsive cream/purple toon design (`toon.css`), and the complete 15-second DDG fan-concept example in `assets/toonclipz-example.mp4`. The example is labeled as AI animation with no affiliation or endorsement. The existing artist portfolio remains available in an expandable section.
+The homepage includes a keyboard/touch photo-to-toon reveal (`toon.js`), a responsive cream/purple toon design (`toon.css`), and the complete 15-second DDG fan-concept example in `assets/toonclipz-example.mp4`. The example is labeled as AI animation with no affiliation or endorsement. The existing artist portfolio remains available in an expandable section.
 
-The offer remains: apply free, preview if selected, $20 to unlock the exact clean 15-second clip. New concepts, revisions and longer clips are separate. Applications retain the same questions, upload bucket and table, record Source: toonclipz plus sanitized utm_source/utm_campaign, and appear in RichMadeIt's admin. Optional showcase and teaching permissions are not preselected. ToonClipz uses its existing Meta pixel 993108543300382; no TikTok tracking has been added in this update.
+The offer remains: apply free, preview if selected, $20 to unlock the exact clean 15-second clip. New concepts, revisions and longer clips are separate. Applications retain the same questions, upload bucket and table, record Source: toonclipz plus sanitized utm_source/utm_campaign, and appear in RichMadeIt's admin. Optional showcase and teaching permissions are not preselected. Existing homepage tracking is preserved by the chip add-on; it does not copy those pixels onto the chip storefront.
 
 The RichMadeIt admin update displays source, requested look, creative idea and permissions, includes these in the copied/downloaded brief, and uses the $20/15-second email and SMS templates for ToonClipz applications. Messages are not sent automatically.
 
-Validation: JavaScript syntax, mocked submission success/failure/retry, duplicate-submit prevention, accurate 15-second selection, source and consent preservation, admin metadata parsing, and media duration. No production test application was submitted. Browser rendering was not verified because the browser installation could not complete.
+Earlier campaign validation covered JavaScript syntax, mocked submission success/failure/retry, duplicate-submit prevention, accurate 15-second selection, source and consent preservation, admin metadata parsing, and media duration. No production test application was submitted. The chip add-on's separate verification scope is in [docs/rich-buys-iphone-qa.md](docs/rich-buys-iphone-qa.md).
