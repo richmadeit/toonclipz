@@ -167,6 +167,12 @@ details{margin:12px 0;padding:14px;background:var(--panel);border:1px solid var(
 .intent-options .check{min-height:64px}
 #previewIntent{scroll-margin-top:20px}
 select:focus-visible{outline:2px solid var(--gold)}
+
+/* One findable social profile; match the existing form styling. */
+#socialPlatform{display:block;width:100%;background:var(--panel);color:var(--paper);border:1px solid var(--line);border-radius:9px;padding:13px 14px;font:inherit;font-size:16.5px;min-height:48px;margin:0 0 14px}
+#socialPlatform:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#artistProfilePolicy strong{color:var(--paper)}
+#artistProfileLink{color:var(--gold);font-weight:600;text-underline-offset:3px;overflow-wrap:anywhere}
 </style>
 
 <!-- Meta Pixel Code -->
@@ -238,11 +244,20 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
     <div id="applicationBody" hidden>
     <section class="block" id="eligibility">
       <h2>1. Get your materials ready</h2>
-      <p class="why">A TikTok profile, a finished song and 3–5 clear images of the same artist are all you need to start. Real artists and existing AI characters are welcome.</p>
+      <p class="why">A TikTok, Instagram or Facebook profile, a finished song and 3–5 clear images of the same artist are all you need to start. Real artists and existing AI characters are welcome.</p>
       <label class="check"><input type="checkbox" id="eligible"><span>I have permission to use the song and images, and to have the person or character shown in this AI video.</span></label>
-      <label for="artistProfile">TikTok page <span class="req">required</span></label>
-      <input type="text" id="artistProfile" inputmode="url" maxlength="500" autocomplete="url" autocapitalize="none" spellcheck="false" placeholder="https://www.tiktok.com/@yourusername" required aria-required="true" aria-describedby="artistProfileHint artistProfileError">
-      <p class="hint" id="artistProfileHint">Paste your TikTok profile link so RichMadeIt can review your page. Use tiktok.com/@yourusername, not a video or shortened share link. Your follower count does not decide whether your preview gets made.</p>
+      <label for="socialPlatform">TikTok, Instagram or Facebook <span class="req">required</span></label>
+      <select id="socialPlatform" name="social_platform" required aria-required="true" aria-describedby="artistProfileHint artistProfileError">
+        <option value="">Choose your platform</option>
+        <option value="tiktok">TikTok</option>
+        <option value="instagram">Instagram (IG)</option>
+        <option value="facebook">Facebook</option>
+      </select>
+      <label for="artistProfile">@handle or profile link <span class="req">required</span></label>
+      <input type="text" id="artistProfile" inputmode="text" maxlength="500" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="@yourusername or instagram.com/yourusername" required aria-required="true" aria-describedby="artistProfileHint artistProfilePolicy artistProfileError">
+      <p class="hint" id="artistProfileHint">Choose a platform and enter your exact @handle, username, or profile/page link. You don't need the full https:// link. Use your handle, not just your display name.</p>
+      <p class="hint" id="artistProfilePolicy"><strong>If I can't find your page, I can't create your preview.</strong> Double-check your spelling and use a page I can find.</p>
+      <p class="hint" id="artistProfilePreview" hidden><a id="artistProfileLink" target="_blank" rel="noopener noreferrer">Check this is your page ↗</a></p>
       <p class="hint" id="artistProfileError" style="color:var(--alert)" aria-live="polite" hidden></p>
     </section>
     <div class="tally" id="tally"><span class="n" id="tallyn">0 of 9</span><span>application requirements complete</span></div>
@@ -569,33 +584,82 @@ function validPhone(){
   const digits=raw.replace(/\D/g,"");
   return !raw || (digits.length>=10 && digits.length<=15);
 }
-// The field keeps its existing ID and the saved Artist profile key for admin compatibility.
-// This checks the link format, not account ownership or whether the applicant is human.
+// Keep the existing Artist profile admin key, always storing a usable HTTPS URL.
+// This validates format only. RichMadeIt must still check that the page exists.
+const SOCIAL_PLATFORMS = {
+  tiktok: {name:"TikTok", base:"https://www.tiktok.com/@"},
+  instagram: {name:"Instagram", base:"https://www.instagram.com/"},
+  facebook: {name:"Facebook", base:"https://www.facebook.com/"}
+};
+const SOCIAL_HOSTS = {
+  "tiktok.com":"tiktok", "www.tiktok.com":"tiktok", "m.tiktok.com":"tiktok",
+  "instagram.com":"instagram", "www.instagram.com":"instagram", "m.instagram.com":"instagram",
+  "facebook.com":"facebook", "www.facebook.com":"facebook", "m.facebook.com":"facebook",
+  "web.facebook.com":"facebook", "mbasic.facebook.com":"facebook", "fb.com":"facebook", "www.fb.com":"facebook"
+};
+const SOCIAL_ROUTES = {
+  tiktok:new Set(["foryou","explore","following","discover","tag","music","live","login","signup","upload","search"]),
+  instagram:new Set(["p","reel","reels","tv","stories","explore","direct","accounts","about","legal","developer","web"]),
+  facebook:new Set(["share","sharer","watch","reel","reels","posts","photo","photos","video","videos","groups","events","gaming","login","help","settings","marketplace","pages","people","search","home.php","story.php","photo.php","sharer.php","permalink.php","profile.php"])
+};
+function parseSocialProfile(value, selectedPlatform){
+  const raw=String(value||"").trim();
+  if(!raw || raw.length>500 || /[\s\\\u0000-\u001f\u007f]/.test(raw)) return null;
+  let platform=selectedPlatform, username=raw.replace(/^@/,"");
+  const looksLikeLink=/^https?:\/\//i.test(raw) || raw.startsWith("//") || /^(?:(?:www|m|web|mbasic)\.)?(?:tiktok|instagram|facebook|fb)\.com(?:[\/?#]|$)/i.test(raw);
+  if(looksLikeLink){
+    try {
+      const u=new URL(raw.startsWith("//") ? "https:"+raw : /^https?:\/\//i.test(raw) ? raw : "https://"+raw);
+      if(!["http:","https:"].includes(u.protocol) || u.username || u.password || u.port) return null;
+      platform=SOCIAL_HOSTS[u.hostname.toLowerCase()];
+      if(!platform) return null;
+      if(platform==="facebook"){
+        if(/^\/profile\.php\/?$/i.test(u.pathname)){
+          const ids=u.searchParams.getAll("id");
+          if(ids.length!==1 || !/^\d{5,30}$/.test(ids[0])) return null;
+          return {platform,url:"https://www.facebook.com/profile.php?id="+ids[0]};
+        }
+        const person=u.pathname.match(/^\/people\/[^/]+\/(\d{5,30})\/?$/i);
+        if(person) return {platform,url:"https://www.facebook.com/profile.php?id="+person[1]};
+      }
+      const match=u.pathname.match(/^\/@?([A-Za-z0-9_.]+)\/?$/);
+      if(!match) return null;
+      username=match[1];
+    } catch { return null; }
+  }
+  if(!Object.hasOwn(SOCIAL_PLATFORMS,platform)) return null;
+  const pattern=platform==="facebook" ? /^[A-Za-z0-9.]{1,100}$/ : /^[A-Za-z0-9_.]{1,100}$/;
+  if(!pattern.test(username) || !/[A-Za-z0-9_]/.test(username) || username.endsWith(".") || SOCIAL_ROUTES[platform].has(username.toLowerCase())) return null;
+  if(platform==="facebook" && /^\d{5,30}$/.test(username)) return {platform,url:"https://www.facebook.com/profile.php?id="+username};
+  return {platform,url:SOCIAL_PLATFORMS[platform].base+username};
+}
 function artistProfileUrl(){
-  const raw = $("artistProfile").value.trim();
-  if(!raw || raw.length>500 || /[\s\\\u0000-\u001f\u007f]/.test(raw)) return "";
-  try {
-    const u = new URL(/^https?:\/\//i.test(raw) ? raw : "https://"+raw);
-    if(!["http:","https:"].includes(u.protocol) || u.username || u.password || u.port) return "";
-    if(!["tiktok.com","www.tiktok.com","m.tiktok.com"].includes(u.hostname.toLowerCase())) return "";
-    const profile = u.pathname.match(/^\/@([A-Za-z0-9_.]+)\/?$/);
-    if(!profile || !/[A-Za-z0-9_]/.test(profile[1]) || profile[1].endsWith(".")) return "";
-    // Store a clean HTTPS profile link, without share parameters or fragments.
-    return "https://www.tiktok.com/@"+profile[1];
-  } catch { return ""; }
+  return parseSocialProfile($("artistProfile").value,$("socialPlatform").value)?.url || "";
 }
 function validateArtistProfile(showError=false){
-  const field=$("artistProfile"), error=$("artistProfileError");
-  const valid=!!artistProfileUrl();
-  const message=valid ? "" : !field.value.trim()
-    ? "Your TikTok page is required. Paste your profile link to continue."
-    : "Use a TikTok profile link like https://www.tiktok.com/@yourusername — not a video, short share link or another website.";
+  const field=$("artistProfile"), select=$("socialPlatform"), error=$("artistProfileError");
+  const profile=parseSocialProfile(field.value,select.value);
+  if(profile) select.value=profile.platform; // A pasted profile link identifies its platform.
+  const platformOK=Object.hasOwn(SOCIAL_PLATFORMS,select.value);
+  const message=profile ? "" : !field.value.trim()
+    ? "Your social profile is required. Choose a platform and enter your @handle or profile link."
+    : !platformOK
+      ? "Choose TikTok, Instagram (IG) or Facebook for your handle, or paste your profile link."
+      : "Enter your exact @username or a TikTok, Instagram or Facebook profile/page link — not a display name, post or short share link.";
+  select.setCustomValidity(platformOK ? "" : "Choose TikTok, Instagram (IG) or Facebook.");
   field.setCustomValidity(message);
   error.textContent=showError ? message : "";
-  error.hidden=!showError || valid;
-  if(showError && !valid) field.setAttribute("aria-invalid","true");
-  else field.removeAttribute("aria-invalid");
-  return valid;
+  error.hidden=!showError || !!profile;
+  field.toggleAttribute("data-profile-valid",!!profile);
+  if(showError && !profile) field.setAttribute("aria-invalid","true"); else field.removeAttribute("aria-invalid");
+  if(showError && !platformOK) select.setAttribute("aria-invalid","true"); else select.removeAttribute("aria-invalid");
+  const preview=$("artistProfilePreview"), link=$("artistProfileLink");
+  preview.hidden=!profile;
+  if(profile){
+    link.href=profile.url;
+    link.textContent="Check your "+SOCIAL_PLATFORMS[profile.platform].name+" page ↗";
+  } else { link.removeAttribute("href"); }
+  return !!profile;
 }
 function tally(){
   const songOK = !!song;
@@ -611,6 +675,11 @@ function tally(){
   $("artistProfile").dataset.touched="true";
   tally();
 }));
+
+$("socialPlatform").addEventListener("change",()=>{
+  $("artistProfile").dataset.touched="true";
+  tally();
+});
 
 $("eligible").addEventListener("change",tally);
 document.querySelectorAll('input[name="purchaseIntent"]').forEach(r=>r.addEventListener("change",()=>{
@@ -692,7 +761,7 @@ $("f").addEventListener("submit", async e=>{
     if(!artistProfileUrl()) $("artistProfile").focus();
     return;
   }
-  const tiktokProfile=artistProfileUrl();
+  const socialProfile=artistProfileUrl();
   if(!sb){$("msg").textContent="The upload service could not load. Refresh the page and try again.";return;}
   submitting=true;
 
@@ -726,7 +795,7 @@ $("f").addEventListener("submit", async e=>{
     const {error:ie}=await sb.from("submissions").insert({
       ref:id,
       artist_name:$("name").value.trim(),
-      contact:`Email: ${$("email").value.trim()} | Phone: ${$("phone").value.trim()} | Artist profile: ${tiktokProfile} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | $20 purchase intent: yes if satisfied (not payment) | Materials permission: confirmed | Application contact: not collected | Public showcase permission: NO | Free/paid teaching permission: NO | Permissions collection: showcase, teaching and contact not requested | Consent version: toonclipz-preview-2026-09-19-no-feature-consent | Consent recorded: ${new Date().toISOString()} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: pending`,
+      contact:`Email: ${$("email").value.trim()} | Phone: ${$("phone").value.trim()} | Artist profile: ${socialProfile} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | $20 purchase intent: yes if satisfied (not payment) | Materials permission: confirmed | Application contact: not collected | Public showcase permission: NO | Free/paid teaching permission: NO | Permissions collection: showcase, teaching and contact not requested | Consent version: toonclipz-preview-2026-09-19-no-feature-consent | Consent recorded: ${new Date().toISOString()} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: pending`,
       photo_paths:photoPaths,
       song_path:songPath,
       song_url: null,
@@ -764,6 +833,6 @@ $("f").addEventListener("submit", async e=>{
 
 tally();
 </script>
-<script src="toon.js?v=20260919-permissions-removed"></script>
+<script src="toon.js?v=20260919-social-profiles"></script>
 </body>
 </html>
