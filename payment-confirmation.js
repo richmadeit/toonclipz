@@ -3,7 +3,26 @@ const $=id=>document.getElementById(id);
 const session=new URLSearchParams(location.search).get('session_id');
 // Remove the bearer-like session reference before loading analytics or following links.
 history.replaceState(null,'',location.pathname);
+function tiktokPurchase(p){
+  if(!p.paid||p.test||p.refunded||!p.eventId)return;
+  if(window.navigator.globalPrivacyControl===true||window.toonclipzTikTokConsent===false)return;
+  const key='toonclipz.tiktok.purchase.'+p.eventId;
+  try{
+    try{if(localStorage.getItem(key))return;}catch{}
+    const PIXEL_ID='DAN48FRC77U1ARFV6OF0';
+    if(!(window.ttq&&window.ttq._i&&window.ttq._i[PIXEL_ID])){
+      !function (w, d, t) {
+        w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie','holdConsent','revokeConsent','grantConsent'],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r='https://analytics.tiktok.com/i18n/pixel/events.js',o=n&&n.partner;ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=d.createElement('script');n.type='text/javascript',n.async=!0,n.src=r+'?sdkid='+e+'&lib='+t;e=d.getElementsByTagName('script')[0];e.parentNode.insertBefore(n,e)};
+        ttq.load(PIXEL_ID);
+
+      }(window, document, 'ttq');
+    }
+    window.ttq.track('Purchase',{value:p.amount/100,currency:p.currency.toUpperCase(),content_type:'product',contents:[{content_id:'toonclipz-15-second',content_name:'ToonClipz 15-second music video',quantity:1}]},{event_id:p.eventId});
+    try{localStorage.setItem(key,'queued');}catch{}
+  }catch(_){console.warn('[ToonClipz tracking] TikTok unavailable; payment remains confirmed.');}
+}
 function purchase(p){
+  tiktokPurchase(p);
   if(p.test||p.refunded)return;
   const key='toonclipz.purchase.'+p.eventId;
   try{if(localStorage.getItem(key))return;}catch{}
@@ -28,7 +47,7 @@ async function check(){
     $('details').hidden=false;
     if(p.receipt){$('receipt').href=p.receipt;$('receipt').hidden=false;}
     if(!p.hasOrderReference)$('next').textContent='This payment has no linked website submission. Contact ToonClipz with your receipt so we can match your photos, song section, and mood before starting.';
-    if(p.test||p.refunded)$('next').textContent=p.test?'Sandbox verification is complete. Test payments are excluded from live Meta Purchase tracking.':'Contact ToonClipz if you have questions about this refunded payment.';
+    if(p.test||p.refunded)$('next').textContent=p.test?'Sandbox verification is complete. Test payments are excluded from live advertising Purchase tracking.':'Contact ToonClipz if you have questions about this refunded payment.';
     purchase(p);
   }catch(e){$('title').textContent='We couldn’t check your payment';$('message').textContent=e.message;$('retry').hidden=false;}
 }
