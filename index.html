@@ -256,7 +256,7 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
 </section>
     <section class="showcase" id="watch" aria-labelledby="watchTitle">
       <div class="showcase-copy"><p class="eyebrow">THE PHOTO IS JUST THE START</p><h2 id="watchTitle">Then we make<br>your world <em>move.</em></h2><p>Our signature cartoon style, built around you. A scene that fits your song. Performance, camera movement and cinematic cuts in one short clip.</p>
-       <ol class="process"><li><b>01</b><div><strong>Build your brief</strong><span>Choose your mood and exact 15 seconds. Upload your song and 3–5 photos of the same artist.</span></div></li><li><b>02</b><div><strong>Book your ToonClip</strong><span>Pay $25 upfront to save $10, or request a free watermarked preview and pay $35 only if you want to unlock it.</span></div></li><li><b>03</b><div><strong>Get your finished video</strong><span>Paid-upfront orders typically arrive by email in 1–6 hours after payment and complete materials. Preview-first requests follow paid orders; unlock the clean clip for $35 when you’re ready.</span></div></li></ol>
+       <ol class="process"><li><b>01</b><div><strong>Build your brief</strong><span>Choose your mood and exact 15 seconds. Upload your song and 1–5 photos of the same artist.</span></div></li><li><b>02</b><div><strong>Book your ToonClip</strong><span>Pay $25 upfront to save $10, or request a free watermarked preview and pay $35 only if you want to unlock it.</span></div></li><li><b>03</b><div><strong>Get your finished video</strong><span>Paid-upfront orders typically arrive by email in 1–6 hours after payment and complete materials. Preview-first requests follow paid orders; unlock the clean clip for $35 when you’re ready.</span></div></li></ol>
        <a href="#previewIntent" class="text-link">Your song could be next ↗</a>
       </div>
       <div class="movie-card"><div class="card-top"><span>THE FINISHED CLIP</span><span>15 SEC</span></div><video id="showreel" controls playsinline preload="metadata" poster="assets/toon-after.jpg" aria-label="Full 15-second ToonClipz DDG fan concept music video"><source src="assets/toonclipz-example.mp4" type="video/mp4"></video><p id="videoStatus">Press play to watch with sound.</p><a class="video-fallback" href="assets/toonclipz-example.mp4" target="_blank" rel="noopener" hidden>Open the video directly ↗</a></div>
@@ -323,21 +323,21 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
       <p class="hint">Listen before submitting. We use this exact section at its original speed.</p>
     </section>
     <section class="block" id="photoSection">
-      <h2>4. Your artist photos <span class="req">required · 3–5 images</span></h2>
+      <h2>4. Your artist photos <span class="req">required · 1–5 images</span></h2>
       <label for="name">Artist name <span class="mini">optional</span></label><input type="text" id="name" autocomplete="off" maxlength="120" placeholder="Your artist name">
-      <p class="why">Upload 3–5 clear photos of the same artist or AI character. Include a front view and other angles so we can create your likeness. One artist per order.</p>
+      <p class="why">Upload 1–5 clear photos of the same artist or AI character. One clear front-facing photo is required. We recommend 3–5 photos from different angles for better likeness. One artist per order.</p>
       <label class="drop" id="pdrop" for="pin" tabindex="0">
         <div class="big">Add artist images</div>
         <div class="sub">JPG, PNG or WebP · Up to 10 MB each</div>
       </label>
       <input type="file" id="pin" accept=".jpg,.jpeg,.png,.webp" multiple aria-required="true" aria-describedby="photoCount photoError">
-      <p class="hint" id="photoCount" aria-live="polite">0 of 5 photos added · At least 3 required</p>
+      <p class="hint" id="photoCount" aria-live="polite">0 of 5 photos added · At least 1 required</p>
       <p class="hint" id="photoError" role="alert" hidden></p>
       <div class="thumbs" id="pthumbs"></div>
       <p class="hint">Your photos, song and direction are saved together so we can make the clip you want.</p>
     </section>
     <div class="send">
-      <div class="order-summary"><strong id="offerSummary">Your ToonClip · $25 upfront</strong><span>1 artist · 1 concept · 15 seconds · Clean MP4</span><p id="briefSummary">Choose your mood, song section and 3–5 photos above.</p></div>
+      <div class="order-summary"><strong id="offerSummary">Your ToonClip · $25 upfront</strong><span>1 artist · 1 concept · 15 seconds · Clean MP4</span><p id="briefSummary">Choose your mood, song section and 1–5 photos above.</p></div>
       <p class="hint" id="offerTerms">One-time payment upfront. Any applicable tax is shown at checkout. Typical turnaround: 1–6 hours after payment and complete materials. Your materials are saved before checkout.</p>
       <button type="submit" class="go" id="go">Continue to secure payment — $25</button>
       <p class="checkout-note" id="offerCheckoutNote">Secure checkout by Stripe · No subscription</p>
@@ -413,7 +413,7 @@ function checkWindow(){
 /* ---------- photos ---------- */
 function drawThumbs(){
   const w = $("pthumbs"); w.innerHTML="";
-  $("photoCount").textContent=photos.length+" of 5 photos added · "+(photos.length>=3 ? "Ready" : "At least 3 required");
+  $("photoCount").textContent=photos.length+" of 5 photos added · "+(photos.length>=1 ? "Ready" : "At least 1 required");
   $("photoError").hidden=true;
   photos.forEach((f,i)=>{
     const d=document.createElement("div"); d.className="thumb";
@@ -433,7 +433,7 @@ function addPhotos(list){
     photos.push(f);
   }
   drawThumbs(); tally();
-  if(photos.length>=3 && photos.length<=5) window.toonclipzActivity?.("photos_ready");
+  if(photos.length>=1 && photos.length<=5) window.toonclipzActivity?.("photos_ready");
   if(notice){$("photoError").textContent=notice;$("photoError").hidden=false;}
 }
 
@@ -589,11 +589,11 @@ function validateBrief(showErrors=false){
   const socialOK=validateSocialProfile();
   const nativeOK=socialOK && validEmail() && !!$("mood").value && (!other || !!$("creativeIdea").value.trim());
   const songOK=!!song;
-  const photosOK=photos.length>=3 && photos.length<=5;
+  const photosOK=photos.length>=1 && photos.length<=5;
   const windowOK=checkWindow();
   if(showErrors){
     $("photoError").hidden=photosOK;
-    $("photoError").textContent=photosOK ? "" : "Add 3–5 photos of the same artist before continuing.";
+    $("photoError").textContent=photosOK ? "" : "Add 1–5 photos of the same artist before continuing.";
     $("songError").hidden=songOK;
     $("songError").textContent=songOK ? "" : "Upload your song before continuing.";
     if(!nativeOK) $("f").reportValidity();
@@ -608,7 +608,7 @@ function tally(){
   const valid=validateBrief();
   if(song && dur>0) window.toonclipzActivity?.("song_ready");
   if(checkWindow()) window.toonclipzActivity?.("clip_selected");
-  $("briefSummary").textContent=valid ? $("mood").value+" · "+$("ts").value+"–"+$("te").value+" · 15 seconds" : "Choose your mood, song section and 3–5 photos above.";
+  $("briefSummary").textContent=valid ? $("mood").value+" · "+$("ts").value+"–"+$("te").value+" · 15 seconds" : "Choose your mood, song section and 1–5 photos above.";
   return valid;
 }
 /* ---------- wiring ---------- */
