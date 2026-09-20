@@ -274,6 +274,9 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
       <label for="email">Email <span class="req">required</span></label>
       <input type="email" id="email" autocomplete="email" placeholder="you@example.com" required maxlength="254">
       <p class="hint">Your video or preview goes here. No phone number needed.</p>
+      <label for="socialProfile">Instagram, TikTok or Facebook profile <span class="mini" id="socialRequirement">optional</span></label>
+      <input type="text" id="socialProfile" maxlength="300" autocomplete="off" placeholder="Profile link, or TikTok @yourname" aria-describedby="socialHint">
+      <p class="hint" id="socialHint">Optional for $25 upfront orders. Share one profile if you’d like us to see your content.</p>
       <label for="mood">1. What mood do you want? <span class="req">required</span></label>
       <select id="mood" required aria-describedby="moodHint"><option value="">Choose your video’s mood</option><option value="Confident / high energy">Confident / high energy</option><option value="Luxury / smooth">Luxury / smooth</option><option value="Dark / intense">Dark / intense</option><option value="Emotional / reflective">Emotional / reflective</option><option value="Romantic / warm">Romantic / warm</option><option value="Fun / playful">Fun / playful</option><option value="Other / describe below">Something else — I’ll describe it below</option></select>
       <label for="creativeIdea">Scene, must-haves or things to avoid <span class="mini" id="ideaRequirement">optional</span></label>
@@ -583,7 +586,8 @@ function validateBrief(showErrors=false){
   $("creativeIdea").required=other;
   $("ideaRequirement").textContent=other ? "required for your own mood" : "optional";
   $("creativeIdea").setCustomValidity(other && !$("creativeIdea").value.trim() ? "Describe the mood you want." : "");
-  const nativeOK=validEmail() && !!$("mood").value && (!other || !!$("creativeIdea").value.trim());
+  const socialOK=validateSocialProfile();
+  const nativeOK=socialOK && validEmail() && !!$("mood").value && (!other || !!$("creativeIdea").value.trim());
   const songOK=!!song;
   const photosOK=photos.length>=3 && photos.length<=5;
   const windowOK=checkWindow();
@@ -629,7 +633,7 @@ $("ts").addEventListener("input",e=>{
   if(checkWindow()){winStart=start;placeSel();} tally();
 });
 $("firstClip").addEventListener("click",()=>{ $("ts").value="0:00";$("te").value="0:15";winStart=0;placeSel();tally(); });
-["email","name","mood","creativeIdea"].forEach(id=>$(id).addEventListener("input",tally));
+["email","name","mood","creativeIdea","socialProfile"].forEach(id=>$(id).addEventListener("input",tally));
 $("mood").addEventListener("change",tally);
 
 /* ============================================================
@@ -677,8 +681,18 @@ function rmiTrackSuccessfulLead(ref){
 
 /* ---------- offer selection ---------- */
 function isPreviewOrder(){return document.querySelector('input[name="orderOffer"]:checked').value==='preview';}
+function validateSocialProfile(){
+ const input=$("socialProfile"), required=isPreviewOrder();
+ input.required=required;
+ const valid=!required || input.value.trim().length>0;
+ input.setCustomValidity(valid ? "" : "Add one Instagram, TikTok or Facebook profile so we can review your preview request.");
+ return valid;
+}
 function updateOffer(){
  const preview=isPreviewOrder();
+ $("socialRequirement").textContent=preview ? "required for free preview" : "optional";
+ $("socialHint").textContent=preview ? "We review your page before creating your free preview. Share one profile we can view. If using a username, include the platform (Instagram, TikTok or Facebook)." : "Optional for $25 upfront orders. Share one profile if you’d like us to see your content.";
+ validateSocialProfile();
  $("offerSummary").textContent=preview ? "Free preview · $35 to unlock" : "Your ToonClip · $25 upfront";
  $("offerTerms").textContent=preview ? "Pay nothing today. We’ll email your watermarked preview after paid orders. Unlock that exact 15-second clip for $35 if you like it. No obligation to buy. Any applicable tax is shown at checkout. Changes and new concepts are quoted separately." : "One-time payment upfront. Any applicable tax is shown at checkout. Typically ready in 1–6 business hours after payment and complete materials; selected weekends. Paid orders get priority.";
  $("go").textContent=preview ? "Request my free preview — $0 today" : "Continue to secure payment — $25";
@@ -769,7 +783,7 @@ $("f").addEventListener("submit", async e=>{
     const {error:ie}=await sb.from("submissions").insert({
       ref:id,
       artist_name:$("name").value.trim() || "Artist name pending",
-      contact:`Email: ${$("email").value.trim()} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | Offer: ${isPreviewOrder() ? "$35 preview-first unlock - FREE watermarked preview requested" : "$25 upfront - one 15-second video"} | Payment: ${isPreviewOrder() ? "NOT REQUIRED FOR PREVIEW - collect $35 before clean delivery" : "UNVERIFIED - check Stripe before production"} | Materials: ${photos.length} photos; song ${song ? "uploaded" : "pending by email"} | Public showcase permission: NO | Free/paid teaching permission: NO | Materials permission: continuing confirms rights to submitted materials | Required mood: ${$("mood").value} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "ToonClipz directs"} | Review: ${isPreviewOrder() ? "PREVIEW REQUEST - materials received; create watermarked preview after paid orders" : "materials received; awaiting payment verification"}`,
+      contact:`Email: ${$("email").value.trim()} | Social profile: ${$("socialProfile").value.trim().replace(/[\r\n|]+/g," ") || "Not supplied"} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | Offer: ${isPreviewOrder() ? "$35 preview-first unlock - FREE watermarked preview requested" : "$25 upfront - one 15-second video"} | Payment: ${isPreviewOrder() ? "NOT REQUIRED FOR PREVIEW - collect $35 before clean delivery" : "UNVERIFIED - check Stripe before production"} | Materials: ${photos.length} photos; song ${song ? "uploaded" : "pending by email"} | Public showcase permission: NO | Free/paid teaching permission: NO | Materials permission: continuing confirms rights to submitted materials | Required mood: ${$("mood").value} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "ToonClipz directs"} | Review: ${isPreviewOrder() ? "PREVIEW REQUEST - review social profile before production; materials received; paid orders first" : "materials received; awaiting payment verification"}`,
       photo_paths:photoPaths,
       song_path:songPath,
       song_url: null,
