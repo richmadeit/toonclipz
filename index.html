@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ToonClipz — Your Custom 15-Second Cartoon Music Video · $25</title>
-<meta name="description" content="Your photos. Your song. Our signature ToonClipz cartoon look. Get your custom 15-second cartoon music video for $25. Pay upfront, send your materials, and receive your clean MP4.">
+<meta name="description" content="Your photos. Your song. Our signature ToonClipz cartoon look. Get your custom 15-second cartoon music video for $25. Upload your materials, pay upfront, and receive your clean MP4.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -238,7 +238,7 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
 </section>
     <section class="showcase" id="watch" aria-labelledby="watchTitle">
       <div class="showcase-copy"><p class="eyebrow">THE PHOTO IS JUST THE START</p><h2 id="watchTitle">Then we make<br>your world <em>move.</em></h2><p>Our signature cartoon style, built around you. A scene that fits your song. Performance, camera movement and cinematic cuts in one short clip.</p>
-       <ol class="process"><li><b>01</b><div><strong>Book your ToonClip</strong><span>Choose your mood and exact 15 seconds. Pay $25 securely through Stripe. One video, one-time payment.</span></div></li><li><b>02</b><div><strong>Send your song and photos</strong><span>Upload your song before checkout. Add 3–5 photos of the same artist now, or email photos after payment.</span></div></li><li><b>03</b><div><strong>Get your finished video</strong><span>We create your ToonClip after payment and materials arrive. Receive a clean 15-second MP4 by email, ready to post.</span></div></li></ol>
+       <ol class="process"><li><b>01</b><div><strong>Build your brief</strong><span>Choose your mood and exact 15 seconds. Upload your song and 3–5 photos of the same artist.</span></div></li><li><b>02</b><div><strong>Book your ToonClip</strong><span>Your materials are saved before checkout. Pay $25 securely through Stripe. One video, one-time payment.</span></div></li><li><b>03</b><div><strong>Get your finished video</strong><span>We create your ToonClip after payment. Receive a clean 15-second MP4 by email, ready to post.</span></div></li></ol>
        <a href="#previewIntent" class="text-link">Your song could be next ↗</a>
       </div>
       <div class="movie-card"><div class="card-top"><span>THE FINISHED CLIP</span><span>15 SEC</span></div><video id="showreel" controls playsinline preload="metadata" poster="assets/toon-after.jpg" aria-label="Full 15-second ToonClipz DDG fan concept music video"><source src="assets/toonclipz-example.mp4" type="video/mp4"></video><p id="videoStatus">Press play to watch with sound.</p><a class="video-fallback" href="assets/toonclipz-example.mp4" target="_blank" rel="noopener" hidden>Open the video directly ↗</a></div>
@@ -297,23 +297,23 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
       <div class="tcnote" id="tcnote" aria-live="polite"></div>
       <p class="hint">Listen before paying. We use this exact section at its original speed.</p>
     </section>
-    <details class="block" id="optionalMaterials"><summary>Add artist name and photos <span class="mini">optional now</span></summary>
+    <section class="block" id="photoSection">
+      <h2>4. Your artist photos <span class="req">required · 3–5 images</span></h2>
       <label for="name">Artist name <span class="mini">optional</span></label><input type="text" id="name" autocomplete="off" maxlength="120" placeholder="Your artist name">
-    <section class="block">
-      <h2>Artist images <span class="mini">optional now</span></h2>
-      <p class="why">Upload 3–5 clear photos of you or images of the SAME AI character. Include a front view and other angles. Use one artist per order. You can also send these after payment.</p>
-      <label class="drop" id="pdrop" for="pin">
+      <p class="why">Upload 3–5 clear photos of the same artist or AI character. Include a front view and other angles so we can create your likeness. One artist per order.</p>
+      <label class="drop" id="pdrop" for="pin" tabindex="0">
         <div class="big">Add artist images</div>
         <div class="sub">JPG, PNG or WebP · Up to 10 MB each</div>
       </label>
-      <input type="file" id="pin" accept=".jpg,.jpeg,.png,.webp" multiple>
+      <input type="file" id="pin" accept=".jpg,.jpeg,.png,.webp" multiple aria-required="true" aria-describedby="photoCount photoError">
+      <p class="hint" id="photoCount" aria-live="polite">0 of 5 photos added · At least 3 required</p>
+      <p class="hint" id="photoError" role="alert" hidden></p>
       <div class="thumbs" id="pthumbs"></div>
+      <p class="hint">Your photos and song are saved before checkout, so we have everything ready when you pay.</p>
     </section>
-      <p class="hint">Your photos are needed before production. If you skip them now, email 3–5 clear photos to <a href="mailto:rich.madeit3@gmail.com">rich.madeit3@gmail.com</a> from your checkout email after paying.</p>
-    </details>
     <div class="send">
-      <div class="order-summary"><strong>Your ToonClip · $25</strong><span>1 artist · 1 concept · 15 seconds · Clean MP4</span><p id="briefSummary">Choose a mood and 15-second song section above.</p></div>
-      <p class="hint">One-time payment upfront. Any applicable tax is shown at checkout. Production starts after payment and your reference photos arrive.</p>
+      <div class="order-summary"><strong>Your ToonClip · $25</strong><span>1 artist · 1 concept · 15 seconds · Clean MP4</span><p id="briefSummary">Choose your mood, song section and 3–5 photos above.</p></div>
+      <p class="hint">One-time payment upfront. Any applicable tax is shown at checkout. Production starts after payment. Your materials are already saved.</p>
       <button type="submit" class="go" id="go">Continue to secure payment — $25</button>
       <p class="checkout-note">Secure checkout by Stripe · No subscription</p>
       <p class="hint">By continuing, you confirm you have permission to use the song and images you submit. AI likeness and motion can vary. Additional changes are quoted separately.</p>
@@ -329,7 +329,7 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 993108543300382');
     <p class="idl">Your order reference</p>
     <p id="lookReceipt"></p>
     <a class="apply-link" id="checkoutLink">Continue to secure payment — $25 ↗</a>
-    <p style="margin-top:20px">After payment, send any remaining reference photos to <a href="mailto:rich.madeit3@gmail.com">rich.madeit3@gmail.com</a>. Include this reference and use your checkout email.</p>
+    <p style="margin-top:20px">Your photos, song and creative direction are saved. Complete payment to place your order. Questions? Email <a href="mailto:rich.madeit3@gmail.com">rich.madeit3@gmail.com</a> with this reference.</p>
   </section>
 
 <footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.<br>A RichMadeIt service.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="mailto:rich.madeit3@gmail.com">Contact</a><p class="fine">Your photos and song are used to create your custom video. Payment is required before production. Any applicable tax is shown at checkout. AI likeness and motion can vary.</p></footer></div>
@@ -388,6 +388,8 @@ function checkWindow(){
 /* ---------- photos ---------- */
 function drawThumbs(){
   const w = $("pthumbs"); w.innerHTML="";
+  $("photoCount").textContent=photos.length+" of 5 photos added · "+(photos.length>=3 ? "Ready" : "At least 3 required");
+  $("photoError").hidden=true;
   photos.forEach((f,i)=>{
     const d=document.createElement("div"); d.className="thumb";
     const img=document.createElement("img"); img.src=URL.createObjectURL(f); img.alt="Artist reference "+(i+1); img.onload=()=>URL.revokeObjectURL(img.src);
@@ -398,12 +400,15 @@ function drawThumbs(){
   });
 }
 function addPhotos(list){
+  let notice="";
   for(const f of list){
-    if(photos.length>=5) break;
-    if(!/\.(jpe?g|png|webp)$/i.test(f.name) || f.size>10*1048576){ $("msg").textContent="Use JPG, PNG or WebP images up to 10 MB each."; continue; }
+    if(photos.length>=5) { notice="Maximum 5 photos. Remove one to add a different image."; break; }
+    if(!/\.(jpe?g|png|webp)$/i.test(f.name) || f.size>10*1048576){ notice="Use JPG, PNG or WebP images up to 10 MB each."; continue; }
+    if(photos.some(p=>p.name===f.name && p.size===f.size && p.lastModified===f.lastModified)){ notice="That photo is already added. Choose different photos of the same artist."; continue; }
     photos.push(f);
   }
   drawThumbs(); tally();
+  if(notice){$("photoError").textContent=notice;$("photoError").hidden=false;}
 }
 
 /* ---------- waveform clipper ---------- */
@@ -557,20 +562,24 @@ function validateBrief(showErrors=false){
   $("creativeIdea").setCustomValidity(other && !$("creativeIdea").value.trim() ? "Describe the mood you want." : "");
   const nativeOK=validEmail() && !!$("mood").value && (!other || !!$("creativeIdea").value.trim());
   const songOK=!!song;
+  const photosOK=photos.length>=3 && photos.length<=5;
   const windowOK=checkWindow();
   if(showErrors){
+    $("photoError").hidden=photosOK;
+    $("photoError").textContent=photosOK ? "" : "Add 3–5 photos of the same artist before continuing to payment.";
     $("songError").hidden=songOK;
     $("songError").textContent=songOK ? "" : "Upload your song before continuing.";
     if(!nativeOK) $("f").reportValidity();
     else if(!songOK) {$("adrop").focus();$("songSection").scrollIntoView({block:"center"});}
     else if(!windowOK) {$("ts").focus();$("tcnote").textContent="Choose an exact 15-second section within your song.";$("tcnote").className="tcnote bad";}
+    else if(!photosOK) {$("pdrop").focus();$("photoSection").scrollIntoView({block:"center"});}
   }
-  return nativeOK && songOK && windowOK;
+  return nativeOK && songOK && windowOK && photosOK;
 }
 function tally(){
   $("go").disabled=submitting;
   const valid=validateBrief();
-  $("briefSummary").textContent=valid ? $("mood").value+" · "+$("ts").value+"–"+$("te").value+" · 15 seconds" : "Choose a mood and 15-second song section above.";
+  $("briefSummary").textContent=valid ? $("mood").value+" · "+$("ts").value+"–"+$("te").value+" · 15 seconds" : "Choose your mood, song section and 3–5 photos above.";
   return valid;
 }
 /* ---------- wiring ---------- */
@@ -705,7 +714,7 @@ $("f").addEventListener("submit", async e=>{
     const {error:ie}=await sb.from("submissions").insert({
       ref:id,
       artist_name:$("name").value.trim() || "Artist name pending",
-      contact:`Email: ${$("email").value.trim()} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | Offer: $25 upfront - one 15-second video | Payment: UNVERIFIED - check Stripe before production | Materials: ${photos.length} photos; song ${song ? "uploaded" : "pending by email"} | Public showcase permission: NO | Free/paid teaching permission: NO | Materials permission: continuing confirms rights to submitted materials | Required mood: ${$("mood").value} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: awaiting payment verification and materials`,
+      contact:`Email: ${$("email").value.trim()} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | Offer: $25 upfront - one 15-second video | Payment: UNVERIFIED - check Stripe before production | Materials: ${photos.length} photos; song ${song ? "uploaded" : "pending by email"} | Public showcase permission: NO | Free/paid teaching permission: NO | Materials permission: continuing confirms rights to submitted materials | Required mood: ${$("mood").value} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "RichMadeIt directs"} | Review: materials received; awaiting payment verification`,
       photo_paths:photoPaths,
       song_path:songPath,
       song_url: null,
@@ -723,7 +732,7 @@ $("f").addEventListener("submit", async e=>{
     bar.style.display="none";
     openCheckout(id);
   }catch(err){
-    msg.textContent="Your song and direction could not be saved. Your form is still filled in. Please retry before paying.";
+    msg.textContent="Your photos, song and direction could not be saved. Your form is still filled in. Please retry before paying.";
     console.error(err);
     submitting=false; $("applicationFields").disabled=false; tally(); go.textContent="Continue to secure payment — $25";
     bar.style.display="none"; fill.style.width="0";
