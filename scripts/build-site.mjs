@@ -5,7 +5,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 // Add future public ToonClipz assets here. Never publish server code, SQL,
 // private buyer content, previews, credentials, or customer records.
 export const WEB_ENTRIES=Object.freeze([
-  'index.html','admin.html','queue.html','toon.css','toon.js',
+  'index.html','admin.html','queue.html','toon.css','toon.js','payment-confirmation.html','payment-confirmation.js',
   'assets','obs-assets','rich-buys-iphone'
 ]);
 export async function build(root=fileURLToPath(new URL('../',import.meta.url))){
