@@ -173,6 +173,9 @@ select:focus-visible{outline:2px solid var(--gold)}
 #socialPlatform:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 #artistProfilePolicy strong{color:var(--paper)}
 #artistProfileLink{color:var(--gold);font-weight:600;text-underline-offset:3px;overflow-wrap:anywhere}
+
+.preview-first-link{display:block;margin-top:19px;color:var(--gold);font-size:14px;font-weight:600;text-underline-offset:4px}
+.offer-options{border:0;padding:0;margin:0 0 30px;min-width:0}.offer-options legend{font:700 21px 'Space Grotesk',sans-serif;margin-bottom:14px}.offer-options .offer-choice{display:flex;align-items:flex-start;gap:13px;padding:19px;margin:0 0 12px;border:2px solid var(--line);border-radius:12px;background:var(--panel);cursor:pointer}.offer-choice:has(input:checked){border-color:var(--gold);background:#eee7ff}.offer-choice:focus-within{outline:2px solid var(--gold);outline-offset:3px}.offer-choice input[type=radio]{display:block;flex:0 0 20px;width:20px;height:20px;min-height:20px;margin:3px 0 0;accent-color:var(--gold)}.offer-choice b{display:block;font-size:18px}.offer-choice small{display:inline-block;background:var(--lime);color:var(--ink);border-radius:5px;padding:3px 7px;margin-left:5px;font-size:12px}.offer-choice span span{display:block;font-size:14px;line-height:1.55;color:var(--muted);margin-top:7px}#checkoutLink[hidden]{display:none!important}
 </style>
 
 <!-- Meta Pixel Code -->
@@ -208,7 +211,7 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
       <h1>Your song.<br>Your cartoon<br><em>music video.</em></h1>
       <p class="hero-description">Turn your photos and your song into a <b>custom 15-second cartoon music video for $25.</b> Made around your face, your sound and your mood.</p>
       <a class="apply-link" id="previewApply" href="#previewIntent">Get my ToonClip — $25 ↗</a>
-      <p class="offer-note"><b>One artist. One concept. Yours to post.</b><br>One-time payment · Clean MP4 · No preview watermark<br><b>Typically ready in 1–6 business hours.</b><br>Selected weekends included.<br>Any applicable tax is shown at checkout.</p><a class="hero-customer-link" href="#testimonials">“That’s fireeeeee” — MDOTTY B · See his video ↗</a></div>
+      <a class="preview-first-link" href="#previewIntent" data-offer="preview">Want to see it first? Free preview · $35 to unlock ↗</a><p class="offer-note"><b>One artist. One concept. Yours to post.</b><br>One-time payment · Clean MP4 · No preview watermark<br><b>Typically ready in 1–6 business hours.</b><br>Selected weekends included.<br>Any applicable tax is shown at checkout.</p><a class="hero-customer-link" href="#testimonials">“That’s fireeeeee” — MDOTTY B · See his video ↗</a></div>
       <div class="transform-card" aria-label="Example photo to cartoon transformation">
        <div class="card-top"><span>THE TRANSFORMATION</span><span class="demo-tag">EXAMPLE</span></div>
        <div class="compare" id="compare">
@@ -253,7 +256,7 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
 </section>
     <section class="showcase" id="watch" aria-labelledby="watchTitle">
       <div class="showcase-copy"><p class="eyebrow">THE PHOTO IS JUST THE START</p><h2 id="watchTitle">Then we make<br>your world <em>move.</em></h2><p>Our signature cartoon style, built around you. A scene that fits your song. Performance, camera movement and cinematic cuts in one short clip.</p>
-       <ol class="process"><li><b>01</b><div><strong>Build your brief</strong><span>Choose your mood and exact 15 seconds. Upload your song and 3–5 photos of the same artist.</span></div></li><li><b>02</b><div><strong>Book your ToonClip</strong><span>Your materials are saved before checkout. Pay $25 securely through Stripe. One video, one-time payment.</span></div></li><li><b>03</b><div><strong>Get your finished video</strong><span>Typically receive your clean 15-second MP4 by email within 1–6 business hours after payment and complete materials. Selected weekends included.</span></div></li></ol>
+       <ol class="process"><li><b>01</b><div><strong>Build your brief</strong><span>Choose your mood and exact 15 seconds. Upload your song and 3–5 photos of the same artist.</span></div></li><li><b>02</b><div><strong>Book your ToonClip</strong><span>Pay $25 upfront to save $10, or request a free watermarked preview and pay $35 only if you want to unlock it.</span></div></li><li><b>03</b><div><strong>Get your finished video</strong><span>Paid-upfront orders typically arrive by email in 1–6 business hours after payment and complete materials. Preview-first requests follow paid orders; unlock the clean clip for $35 when you’re ready.</span></div></li></ol>
        <a href="#previewIntent" class="text-link">Your song could be next ↗</a>
       </div>
       <div class="movie-card"><div class="card-top"><span>THE FINISHED CLIP</span><span>15 SEC</span></div><video id="showreel" controls playsinline preload="metadata" poster="assets/toon-after.jpg" aria-label="Full 15-second ToonClipz DDG fan concept music video"><source src="assets/toonclipz-example.mp4" type="video/mp4"></video><p id="videoStatus">Press play to watch with sound.</p><a class="video-fallback" href="assets/toonclipz-example.mp4" target="_blank" rel="noopener" hidden>Open the video directly ↗</a></div>
@@ -261,12 +264,16 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
 
     <section class="offer-card" aria-label="ToonClipz offer"><div><p class="eyebrow">YOUR SONG. YOUR OWN TOONCLIP.</p><h2>Your cartoon moment.<br><em>Made for you.</em></h2></div><div class="offer-price"><strong>$25</strong><span>Clean 15-second video<br>One-time payment upfront</span></div><p>One artist. One concept. Our signature cartoon look. Your selected song section. Revisions, new concepts and longer videos are quoted separately.</p><a class="apply-link" href="#previewIntent">Get my ToonClip — $25 ↗</a></section>
     <section class="block order-start" id="previewIntent" aria-labelledby="intentTitle">
-      <p class="eyebrow">YOUR CUSTOM TOONCLIP · $25</p>
+      <p class="eyebrow">YOUR CUSTOM TOONCLIP · YOUR CHOICE</p>
+      <fieldset class="offer-options"><legend>How would you like to order?</legend>
+        <label class="offer-choice"><input type="radio" name="orderOffer" value="upfront" checked><span><b>Pay $25 upfront <small>Save $10</small></b><span>Clean 15-second MP4. Paid orders get priority. Typically 1–6 business hours after payment and complete materials; selected weekends.</span></span></label>
+        <label class="offer-choice"><input type="radio" name="orderOffer" value="preview"><span><b>See a free preview first</b><span>No payment today. Receive a watermarked preview by email. Like it? Pay $35 to unlock that exact clip without the watermark. No obligation to buy. Paid orders are completed first.</span></span></label>
+      </fieldset>
       <h2 id="intentTitle">Let’s make it feel like you.</h2>
       <p class="why">Tell us the mood and choose your song section. Your email is the only contact detail we need.</p>
       <label for="email">Email <span class="req">required</span></label>
       <input type="email" id="email" autocomplete="email" placeholder="you@example.com" required maxlength="254">
-      <p class="hint">Your video goes here. We’ll prefill this email at secure checkout.</p>
+      <p class="hint">Your video or preview goes here. No phone number needed.</p>
       <label for="mood">1. What mood do you want? <span class="req">required</span></label>
       <select id="mood" required aria-describedby="moodHint"><option value="">Choose your video’s mood</option><option value="Confident / high energy">Confident / high energy</option><option value="Luxury / smooth">Luxury / smooth</option><option value="Dark / intense">Dark / intense</option><option value="Emotional / reflective">Emotional / reflective</option><option value="Romantic / warm">Romantic / warm</option><option value="Fun / playful">Fun / playful</option><option value="Other / describe below">Something else — I’ll describe it below</option></select>
       <label for="creativeIdea">Scene, must-haves or things to avoid <span class="mini" id="ideaRequirement">optional</span></label>
@@ -310,7 +317,7 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
       <div class="pair tc"><div><label for="ts">Starts at (m:ss)</label><input type="text" id="ts" required inputmode="numeric" placeholder="0:58" aria-describedby="tcnote"></div><div><label for="te">Ends at (automatic)</label><input type="text" id="te" readonly required placeholder="1:13" aria-describedby="tcnote"></div></div>
       <button class="clip-shortcut" type="button" id="firstClip">Use the first 15 seconds</button>
       <div class="tcnote" id="tcnote" aria-live="polite"></div>
-      <p class="hint">Listen before paying. We use this exact section at its original speed.</p>
+      <p class="hint">Listen before submitting. We use this exact section at its original speed.</p>
     </section>
     <section class="block" id="photoSection">
       <h2>4. Your artist photos <span class="req">required · 3–5 images</span></h2>
@@ -324,13 +331,13 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
       <p class="hint" id="photoCount" aria-live="polite">0 of 5 photos added · At least 3 required</p>
       <p class="hint" id="photoError" role="alert" hidden></p>
       <div class="thumbs" id="pthumbs"></div>
-      <p class="hint">Your photos and song are saved before checkout, so we have everything ready when you pay.</p>
+      <p class="hint">Your photos, song and direction are saved together so we can make the clip you want.</p>
     </section>
     <div class="send">
-      <div class="order-summary"><strong>Your ToonClip · $25</strong><span>1 artist · 1 concept · 15 seconds · Clean MP4</span><p id="briefSummary">Choose your mood, song section and 3–5 photos above.</p></div>
-      <p class="hint">One-time payment upfront. Any applicable tax is shown at checkout. Typical turnaround: 1–6 business hours after payment and complete materials. Selected weekends included. Your materials are saved before checkout.</p>
+      <div class="order-summary"><strong id="offerSummary">Your ToonClip · $25 upfront</strong><span>1 artist · 1 concept · 15 seconds · Clean MP4</span><p id="briefSummary">Choose your mood, song section and 3–5 photos above.</p></div>
+      <p class="hint" id="offerTerms">One-time payment upfront. Any applicable tax is shown at checkout. Typical turnaround: 1–6 business hours after payment and complete materials. Selected weekends included. Your materials are saved before checkout.</p>
       <button type="submit" class="go" id="go">Continue to secure payment — $25</button>
-      <p class="checkout-note">Secure checkout by Stripe · No subscription</p>
+      <p class="checkout-note" id="offerCheckoutNote">Secure checkout by Stripe · No subscription</p>
       <p class="hint">By continuing, you confirm you have permission to use the song and images you submit. AI likeness and motion can vary. Additional changes are quoted separately.</p>
       <div class="bar" id="bar"><i></i></div><div class="msg" id="msg" role="status" aria-live="polite"></div>
     </div>
@@ -344,10 +351,10 @@ console.info('[TOONCLIPZ tracking] Meta Pixel loaded: 1066699776252161');
     <p class="idl">Your order reference</p>
     <p id="lookReceipt"></p>
     <a class="apply-link" id="checkoutLink">Continue to secure payment — $25 ↗</a>
-    <p style="margin-top:20px">Your photos, song and creative direction are saved. Complete payment to place your order. Questions? Message <a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">ToonClipz on Instagram</a> with this reference.</p>
+    <p id="receiptHelp" style="margin-top:20px">Your photos, song and creative direction are saved. Complete payment to place your order. Questions? Message <a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">ToonClipz on Instagram</a> with this reference.</p>
   </section>
 
-<footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Contact ToonClipz</a><p class="fine">Your photos and song are used to create your custom video. Payment is required before production. Any applicable tax is shown at checkout. AI likeness and motion can vary. We measure anonymous page visits and order steps to improve this site; typed form content is not included in activity analytics.</p></footer></div>
+<footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Contact ToonClipz</a><p class="fine">Your photos and song are used to create your custom video. Pay $25 upfront, or request a free watermarked preview and pay $35 to unlock the clean clip. No payment is required to request a preview. Any applicable tax is shown at checkout. AI likeness and motion can vary. We measure anonymous page visits and order steps to improve this site; typed form content is not included in activity analytics.</p></footer></div>
 <div class="mobile-cta"><span>Your own ToonClip. <b>15 seconds · $25</b></span><a href="#previewIntent">Get started ↗</a></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -582,7 +589,7 @@ function validateBrief(showErrors=false){
   const windowOK=checkWindow();
   if(showErrors){
     $("photoError").hidden=photosOK;
-    $("photoError").textContent=photosOK ? "" : "Add 3–5 photos of the same artist before continuing to payment.";
+    $("photoError").textContent=photosOK ? "" : "Add 3–5 photos of the same artist before continuing.";
     $("songError").hidden=songOK;
     $("songError").textContent=songOK ? "" : "Upload your song before continuing.";
     if(!nativeOK) $("f").reportValidity();
@@ -637,7 +644,7 @@ function rmiTrackingPayload(){
   const a = toSec($("ts").value), b = toSec($("te").value);
   return {
     form_name: "toonclipz_music_order",
-    offer: "15_second_video_25",
+    offer: isPreviewOrder() ? "15_second_preview_unlock_35" : "15_second_video_25",
     style: "cartoon",
     style_variant: "cinematic_toon",
     source: previewSource,
@@ -661,13 +668,41 @@ function rmiTrackSuccessfulLead(ref){
     window.fbq("track", "Lead", {
       content_name: "ToonClipz 15-second music video order",
       content_category: "music promo",
-      application_type: "order_details_saved"
+      application_type: isPreviewOrder() ? "preview_requested" : "order_details_saved"
     });
   }
   console.info("[TOONCLIPZ tracking] Lead", p);
 }
 
 
+/* ---------- offer selection ---------- */
+function isPreviewOrder(){return document.querySelector('input[name="orderOffer"]:checked').value==='preview';}
+function updateOffer(){
+ const preview=isPreviewOrder();
+ $("offerSummary").textContent=preview ? "Free preview · $35 to unlock" : "Your ToonClip · $25 upfront";
+ $("offerTerms").textContent=preview ? "Pay nothing today. We’ll email your watermarked preview after paid orders. Unlock that exact 15-second clip for $35 if you like it. No obligation to buy. Any applicable tax is shown at checkout. Changes and new concepts are quoted separately." : "One-time payment upfront. Any applicable tax is shown at checkout. Typically ready in 1–6 business hours after payment and complete materials; selected weekends. Paid orders get priority.";
+ $("go").textContent=preview ? "Request my free preview — $0 today" : "Continue to secure payment — $25";
+ $("offerCheckoutNote").textContent=preview ? "No card needed · $35 only if you unlock" : "Secure checkout by Stripe · No subscription";
+}
+document.querySelectorAll('input[name="orderOffer"]').forEach(input=>input.addEventListener('change',updateOffer));
+document.addEventListener('click',event=>{
+ const link=event.target.closest('a[href="#previewIntent"]');
+ if(!link || submitting)return;
+ document.querySelector('input[name="orderOffer"][value="'+(link.dataset.offer==='preview'?'preview':'upfront')+'"]').checked=true;
+ updateOffer();
+});
+function showPreviewReceipt(id){
+ $("rid").textContent=id;
+ $("receiptTitle").textContent="Your free preview request is saved";
+ $("receiptStatus").textContent="No payment is due today. We’ll email your watermarked preview after paid orders. If you like it, you can pay $35 to unlock the exact clip without the watermark. You’re not committed to buying.";
+ $("lookReceipt").textContent=$("mood").value+" · "+$("ts").value+"–"+$("te").value+" · ToonClipz Cinematic 3D";
+ $("checkoutLink").hidden=true;
+ $("receiptHelp").textContent="Keep your request reference above. Your photos, song and direction are saved—you don’t need to submit again. Check your email, including spam, for your preview.";
+ $("receipt").style.display="block";
+ $("receipt").setAttribute("tabindex","-1");
+ $("receipt").scrollIntoView({block:"center"});$("receipt").focus({preventScroll:true});
+}
+function finishSubmission(id){if(isPreviewOrder())showPreviewReceipt(id);else openCheckout(id);}
 /* ---------- submit ---------- */
 const code=()=>{ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s="";
   for(let i=0;i<5;i++) s+=c[Math.floor(Math.random()*c.length)]; return "RMI-"+s; };
@@ -678,7 +713,7 @@ function trackCheckout(){
   try {
     if(navigator.globalPrivacyControl===true) return;
     if(typeof window.fbq==="function") window.fbq("track","InitiateCheckout",{value:25,currency:"USD",content_name:"ToonClipz 15-second video"});
-    if(window.toonclipzTikTokConsent!==false && window.ttq && typeof window.ttq.track==="function") window.ttq.track("InitiateCheckout",{value:25,currency:"USD"});
+    if(window.toonclipzTikTokConsent!==false && window.ttq && typeof window.ttq.track==="function") window.ttq.track("InitiateCheckout",{value:25,currency:"USD",content_type:"product",contents:[{content_id:"toonclipz-15-second",content_name:"ToonClipz 15-second music video",quantity:1}]});
   } catch (_) {}
 }
 function openCheckout(id){
@@ -734,7 +769,7 @@ $("f").addEventListener("submit", async e=>{
     const {error:ie}=await sb.from("submissions").insert({
       ref:id,
       artist_name:$("name").value.trim() || "Artist name pending",
-      contact:`Email: ${$("email").value.trim()} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | Offer: $25 upfront - one 15-second video | Payment: UNVERIFIED - check Stripe before production | Materials: ${photos.length} photos; song ${song ? "uploaded" : "pending by email"} | Public showcase permission: NO | Free/paid teaching permission: NO | Materials permission: continuing confirms rights to submitted materials | Required mood: ${$("mood").value} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "ToonClipz directs"} | Review: materials received; awaiting payment verification`,
+      contact:`Email: ${$("email").value.trim()} | Requested look: ${selectedStyleName()} | Source: ${previewSource} | Traffic source: ${trafficSource} | Campaign: ${trafficCampaign} | Offer: ${isPreviewOrder() ? "$35 preview-first unlock - FREE watermarked preview requested" : "$25 upfront - one 15-second video"} | Payment: ${isPreviewOrder() ? "NOT REQUIRED FOR PREVIEW - collect $35 before clean delivery" : "UNVERIFIED - check Stripe before production"} | Materials: ${photos.length} photos; song ${song ? "uploaded" : "pending by email"} | Public showcase permission: NO | Free/paid teaching permission: NO | Materials permission: continuing confirms rights to submitted materials | Required mood: ${$("mood").value} | Creative idea: ${$("creativeIdea").value.trim().replace(/[\r\n|]+/g," ") || "ToonClipz directs"} | Review: ${isPreviewOrder() ? "PREVIEW REQUEST - materials received; create watermarked preview after paid orders" : "materials received; awaiting payment verification"}`,
       photo_paths:photoPaths,
       song_path:songPath,
       song_url: null,
@@ -750,16 +785,17 @@ $("f").addEventListener("submit", async e=>{
     fill.style.width="100%";
     go.textContent="Details saved";
     bar.style.display="none";
-    openCheckout(id);
+    finishSubmission(id);
   }catch(err){
     window.toonclipzActivity?.("form_error");
-    msg.textContent="Your photos, song and direction could not be saved. Your form is still filled in. Please retry before paying.";
+    msg.textContent="Your photos, song and direction could not be saved. Your form is still filled in. Please retry; your request has not been confirmed.";
     console.error(err);
-    submitting=false; $("applicationFields").disabled=false; tally(); go.textContent="Continue to secure payment — $25";
+    submitting=false; $("applicationFields").disabled=false; tally(); updateOffer();
     bar.style.display="none"; fill.style.width="0";
   }
 });
 
+updateOffer();
 tally();
 </script>
 <script src="activity.js?v=1"></script>
