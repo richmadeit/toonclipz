@@ -1,0 +1,13 @@
+{
+  "name": "toonclipz-dashboard",
+  "version": "1.0.0",
+  "dependencies": {
+    "@netlify/blobs": "11.1.0"
+  },
+  "private": true,
+  "description": "ToonClipz website and private activity dashboard",
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "test:activity": "node --test tests/activity.test.mjs tests/payment-verification.test.mjs"
+  }
+}

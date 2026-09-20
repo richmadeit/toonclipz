@@ -347,7 +347,7 @@ console.info('[RICHMADEIT tracking] Meta Pixel loaded: 1066699776252161');
     <p style="margin-top:20px">Your photos, song and creative direction are saved. Complete payment to place your order. Questions? Email <a href="mailto:rich.madeit3@gmail.com">rich.madeit3@gmail.com</a> with this reference.</p>
   </section>
 
-<footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.<br>A RichMadeIt service.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="mailto:rich.madeit3@gmail.com">Contact</a><p class="fine">Your photos and song are used to create your custom video. Payment is required before production. Any applicable tax is shown at checkout. AI likeness and motion can vary.</p></footer></div>
+<footer class="footer"><a class="wordmark" href="#">TOON<span>CLIPZ</span></a><p>Cartoon worlds. Real main character energy.<br>A RichMadeIt service.</p><a href="https://www.instagram.com/toon_clipz_/" target="_blank" rel="noopener">Instagram ↗</a> · <a href="mailto:rich.madeit3@gmail.com">Contact</a><p class="fine">Your photos and song are used to create your custom video. Payment is required before production. Any applicable tax is shown at checkout. AI likeness and motion can vary. We measure anonymous page visits and order steps to improve this site; typed form content is not included in activity analytics.</p></footer></div>
 <div class="mobile-cta"><span>Your own ToonClip. <b>15 seconds · $25</b></span><a href="#previewIntent">Get started ↗</a></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -423,6 +423,7 @@ function addPhotos(list){
     photos.push(f);
   }
   drawThumbs(); tally();
+  if(photos.length>=3 && photos.length<=5) window.toonclipzActivity?.("photos_ready");
   if(notice){$("photoError").textContent=notice;$("photoError").hidden=false;}
 }
 
@@ -594,6 +595,8 @@ function validateBrief(showErrors=false){
 function tally(){
   $("go").disabled=submitting;
   const valid=validateBrief();
+  if(song && dur>0) window.toonclipzActivity?.("song_ready");
+  if(checkWindow()) window.toonclipzActivity?.("clip_selected");
   $("briefSummary").textContent=valid ? $("mood").value+" · "+$("ts").value+"–"+$("te").value+" · 15 seconds" : "Choose your mood, song section and 3–5 photos above.";
   return valid;
 }
@@ -652,6 +655,7 @@ function rmiTrackBuildClick(){
 }
 
 function rmiTrackSuccessfulLead(ref){
+  window.toonclipzActivity?.("details_saved");
   const p = {...rmiTrackingPayload(), submission_ref: ref};
   if(typeof window.fbq === "function"){
     window.fbq("track", "Lead", {
@@ -670,6 +674,7 @@ const code=()=>{ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s="";
 const clean=n=>n.replace(/[^a-zA-Z0-9._-]/g,"_");
 
 function trackCheckout(){
+  window.toonclipzActivity?.("checkout");
   try {
     if(navigator.globalPrivacyControl===true) return;
     if(typeof window.fbq==="function") window.fbq("track","InitiateCheckout",{value:25,currency:"USD",content_name:"ToonClipz 15-second video"});
@@ -747,6 +752,7 @@ $("f").addEventListener("submit", async e=>{
     bar.style.display="none";
     openCheckout(id);
   }catch(err){
+    window.toonclipzActivity?.("form_error");
     msg.textContent="Your photos, song and direction could not be saved. Your form is still filled in. Please retry before paying.";
     console.error(err);
     submitting=false; $("applicationFields").disabled=false; tally(); go.textContent="Continue to secure payment — $25";
@@ -756,6 +762,7 @@ $("f").addEventListener("submit", async e=>{
 
 tally();
 </script>
+<script src="activity.js?v=1"></script>
 <script src="toon.js?v=20260920-customer-reveal"></script>
 </body>
 </html>
