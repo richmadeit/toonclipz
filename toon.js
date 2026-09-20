@@ -121,7 +121,8 @@
         </div>
         <div class="tc-proof-total"><strong>≈361K</strong><span>Combined video views<br>across the 3 posts below</span></div>
       </div>
-      <div class="tc-proof-grid">
+      <p class="proof-snapshot"><strong>Tota Mc reposted · 284.9K views</strong><span>Plus music-video posts with 39K and 37.2K views.</span></p>
+      <details class="proof-details"><summary>See the repost, numbers and original screenshots ↗</summary><div class="tc-proof-grid">
         <article class="tc-proof-card tc-proof-featured">
           <div class="tc-proof-tag">↻ REPOSTED BY TOTA MC</div>
           <div class="tc-proof-body"><h3>A cartoon conversation.</h3>
@@ -156,6 +157,7 @@
           <p class="tc-proof-caption">Posted July 9, 2026. Earlier, longer example; the current offer is 15 seconds.</p>
         </article>
       </div>
+      </details>
       <div class="tc-proof-actions"><a class="apply-link" href="#previewIntent">Get my ToonClip — $25 ↗</a><a class="text-link" href="https://www.tiktok.com/@toon_clipz_?lang=en" target="_blank" rel="noopener noreferrer">Visit @toon_clipz_ on TikTok ↗</a></div>
       <p class="tc-proof-note">Selected past results from ToonClipz posts, shown as captured in the supplied screenshots. Combined views are approximate, not unique viewers. Results vary; views, followers and sales are not guaranteed. The Tota Mc repost applies to the conversation post shown, not the DDG example, and does not imply endorsement or partnership.</p>
     `;
@@ -167,7 +169,7 @@
       const link = document.createElement('a');
       link.href = '#results';
       link.className = 'tc-proof-hero-link';
-      link.textContent = 'About 361K views across 3 posts. See the proof ↗';
+      link.textContent = 'Tota Mc reposted · ≈361K views across 3 posts ↗';
       hero.appendChild(link);
     }
     const dialog = document.createElement('dialog');
@@ -217,4 +219,12 @@
   form.addEventListener('submit',()=>video.pause());
   const receipt=document.getElementById('receipt');
   new MutationObserver(()=>{if(receipt.style.display==='block')document.querySelector('.mobile-cta').hidden=true;}).observe(receipt,{attributes:true,attributeFilter:['style']});
+})();
+// Pause the other players when visitors watch a result or preview their own song.
+(() => {
+  const customer=document.getElementById('customerVideo');
+  const example=document.getElementById('showreel');
+  customer?.addEventListener('play',()=>{example.pause();if(typeof audioEl!=='undefined'&&audioEl)audioEl.pause();});
+  example.addEventListener('play',()=>customer?.pause());
+  document.getElementById('pbtn').addEventListener('click',()=>customer?.pause());
 })();
