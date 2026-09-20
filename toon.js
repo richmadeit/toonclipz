@@ -26,7 +26,7 @@
         if (pixel && typeof pixel.track === 'function' && pixel._i && pixel._i[PIXEL_ID]) {
           submittedRefs.add(ref);
           // No email, phone, artist name, filenames, song, lyrics, or creative idea.
-          // No purchase or $20 value: this is a free application, not a payment.
+          // Saving order details is not proof of payment. Never fire Purchase here.
           // Lead is TikTok's current name for SubmitForm; send only one event.
           pixel.track('Lead');
         }
@@ -153,10 +153,10 @@
           <a class="tc-proof-evidence" href="assets/proof/music-37k.avif" target="_blank" rel="noopener" data-proof-title="45.19-second music post · 37.2K views" data-proof-note="TikTok Studio screenshot: post published July 9, 2026; analytics updated September 18, 2026. Includes 9.0-second average watch time and 5.56% full-video completion. This older example is longer than the current 15-second offer." aria-label="Enlarge the TikTok Studio screenshot showing 37.2K views, 2,106 likes and 18 new followers">
             <img src="assets/proof/music-37k.avif" width="416" height="903" loading="lazy" decoding="async" alt="TikTok Studio analytics for a 45.19-second ToonClipz music video: 37.2K views, 2,106 likes, 49 comments, 49 shares, 150 saves and 18 new followers."><span>Open the actual analytics ↗</span>
           </a>
-          <p class="tc-proof-caption">Posted July 9, 2026. Earlier, longer example; the current preview offer is 15 seconds.</p>
+          <p class="tc-proof-caption">Posted July 9, 2026. Earlier, longer example; the current offer is 15 seconds.</p>
         </article>
       </div>
-      <div class="tc-proof-actions"><a class="apply-link" href="#previewIntent">Get my cartoon preview ↗</a><a class="text-link" href="https://www.tiktok.com/@toon_clipz_?lang=en" target="_blank" rel="noopener noreferrer">Visit @toon_clipz_ on TikTok ↗</a></div>
+      <div class="tc-proof-actions"><a class="apply-link" href="#previewIntent">Get my ToonClip — $25 ↗</a><a class="text-link" href="https://www.tiktok.com/@toon_clipz_?lang=en" target="_blank" rel="noopener noreferrer">Visit @toon_clipz_ on TikTok ↗</a></div>
       <p class="tc-proof-note">Selected past results from ToonClipz posts, shown as captured in the supplied screenshots. Combined views are approximate, not unique viewers. Results vary; views, followers and sales are not guaranteed. The Tota Mc repost applies to the conversation post shown, not the DDG example, and does not imply endorsement or partnership.</p>
     `;
     showcase.insertAdjacentElement('afterend', section);
@@ -211,7 +211,7 @@
   const fallback=()=>{status.textContent='Having trouble playing? Open the video below.';document.querySelector('.video-fallback').hidden=false;};
   video.addEventListener('error',fallback);video.querySelector('source').addEventListener('error',fallback);
   video.addEventListener('play',()=>{status.textContent='Now playing · Full 15-second example';if(typeof audioEl!=='undefined'&&audioEl)audioEl.pause();});
-  video.addEventListener('ended',()=>{status.textContent='Your song could be next. Apply below.';});
+  video.addEventListener('ended',()=>{status.textContent='Your song could be next. Get started below.';});
   document.getElementById('pbtn').addEventListener('click',()=>video.pause());
   const form=document.getElementById('f');
   form.addEventListener('submit',()=>video.pause());
