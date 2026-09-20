@@ -222,6 +222,29 @@
 })();
 // Pause the other players when visitors watch a result or preview their own song.
 (() => {
+  const slider=document.getElementById('customerReveal');
+  if(!slider)return;
+  const layer=document.getElementById('customerBefore');
+  const divider=document.getElementById('customerDivider');
+  const compare=document.getElementById('customerCompare');
+  const buttons=document.querySelectorAll('[data-customer-reveal]');
+  const reveal=value=>{
+    const v=Math.max(0,Math.min(100,Number(value)));
+    slider.value=v;layer.style.clipPath=`inset(0 ${100-v}% 0 0)`;divider.style.left=v+'%';
+    slider.setAttribute('aria-valuetext',Math.round(v)+' percent original photo');
+    buttons.forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.customerReveal)===v?'true':'false'));
+  };
+  slider.addEventListener('input',()=>reveal(slider.value));
+  buttons.forEach(b=>b.addEventListener('click',()=>reveal(b.dataset.customerReveal)));
+  let dragging=false;
+  const point=e=>{const r=compare.getBoundingClientRect();reveal((e.clientX-r.left)/r.width*100);};
+  compare.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;dragging=true;compare.setPointerCapture(e.pointerId);point(e);});
+  compare.addEventListener('pointermove',e=>{if(dragging)point(e);});
+  ['pointerup','pointercancel','lostpointercapture'].forEach(type=>compare.addEventListener(type,()=>{dragging=false;}));
+  reveal(slider.value);
+  document.querySelector('.customer-movie')?.addEventListener('toggle',e=>{if(!e.currentTarget.open)document.getElementById('customerVideo')?.pause();});
+})();
+(() => {
   const customer=document.getElementById('customerVideo');
   const example=document.getElementById('showreel');
   customer?.addEventListener('play',()=>{example.pause();if(typeof audioEl!=='undefined'&&audioEl)audioEl.pause();});
