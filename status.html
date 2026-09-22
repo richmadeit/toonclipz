@@ -1,17 +1,18 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>ToonClipz · Live activity</title><link rel="stylesheet" href="status.css"><script src="status.js" defer></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>RichMadeIt + ToonClipz · Live activity</title><link rel="stylesheet" href="status.css"><script src="status.js" defer></script></head>
 <body>
 <header><a class="brand" href="/">TOON<span>CLIPZ</span><small>OWNER DASHBOARD</small></a><div class="head-actions"><span id="connection" role="status">Private access</span><button id="logout" hidden>Sign out</button></div></header>
 <main>
-<section id="login" class="gate panel"><span class="eyebrow">YOUR BUSINESS, AT A GLANCE</span><h1>See what’s happening.</h1><p>Visits, customer activity and verified $25 purchases in one place.</p><form id="loginForm"><label for="password">Dashboard password</label><input id="password" type="password" autocomplete="current-password" required minlength="16"><button class="primary" id="signIn">Open dashboard →</button></form><p id="loginMessage" role="alert"></p><small>Your dashboard password is checked securely on the server.</small></section>
+<section id="login" class="gate panel"><span class="eyebrow">YOUR BUSINESS, AT A GLANCE</span><h1>See what’s happening.</h1><p>Visits, customer activity and verified purchases for ToonClipz and RichMadeIt in one place.</p><form id="loginForm"><label for="password">Dashboard password</label><input id="password" type="password" autocomplete="current-password" required minlength="16"><button class="primary" id="signIn">Open dashboard →</button></form><p id="loginMessage" role="alert"></p><small>Your dashboard password is checked securely on the server.</small></section>
 <section id="dashboard" hidden>
-<div class="title-row"><div><span class="eyebrow">TOONCLIPZ / ACTIVITY</span><h1>Every visit is a possibility.</h1><p id="updated">Waiting for your first refresh.</p></div><div class="controls"><label class="sr-only" for="range">Time range</label><select id="range"><option value="24h">Last 24 hours</option><option value="7d">Last 7 days</option></select><button id="refresh">Refresh ↻</button></div></div>
+<nav class="brand-toggle" aria-label="Choose website"><button type="button" id="showToonclipz" aria-pressed="true">ToonClipz</button><button type="button" id="showRichmadeit" aria-pressed="false">RichMadeIt</button><a id="openSite" href="https://toonclipz.netlify.app/" target="_blank" rel="noopener noreferrer">Open page ↗</a></nav>
+<div class="title-row"><div><span class="eyebrow" id="activityBrand">TOONCLIPZ / ACTIVITY</span><h1>Every visit is a possibility.</h1><p id="updated">Waiting for your first refresh.</p></div><div class="controls"><label class="sr-only" for="range">Time range</label><select id="range"><option value="24h">Last 24 hours</option><option value="7d">Last 7 days</option></select><button id="refresh">Refresh ↻</button></div></div>
 <div id="warning" class="notice" hidden role="status"></div>
 <div class="stats">
 <article class="panel metric"><span>Recent visitors</span><strong id="recent">—</strong><small>Activity in the last 5 minutes</small></article>
 <article class="panel metric"><span>Page views</span><strong id="views">—</strong><small>Tracked landing-page loads</small></article>
 <article class="panel metric"><span>Visits</span><strong id="visits">—</strong><small>Anonymous browser sessions</small></article>
-<article class="panel metric"><span>$25 purchases</span><strong id="purchases">—</strong><small>Verified directly with Stripe</small></article>
+<article class="panel metric"><span id="purchaseLabel">$25 purchases</span><strong id="purchases">—</strong><small>Verified directly with Stripe</small></article>
 </div>
 <div class="layout">
 <section class="panel chart-panel"><div class="section-title"><div><h2>Traffic pulse</h2><p>Page views by hour · last 24 hours</p></div><span class="pill">30s refresh</span></div><div id="chart" class="chart" role="img" aria-label="No page-view data loaded"></div><div class="axis"><span>24 hours ago</span><span>Now</span></div></section>
@@ -20,6 +21,6 @@
 <section class="panel"><h2>Where visits come from</h2><p>Tagged links and referring sites</p><div id="sources"></div><p class="footnote">Use utm_source=instagram, facebook or tiktok on your links. Missing referral information appears as Direct.</p></section>
 <section class="panel wide"><div class="section-title"><div><h2>Latest activity</h2><p>Anonymous actions, newest first</p></div><span class="pill">Last 40 events</span></div><div class="table-wrap"><table><thead><tr><th>Time</th><th>Action</th><th>Source</th><th>Device</th></tr></thead><tbody id="events"></tbody></table></div><p id="empty" hidden>No activity yet. Your first tracked visit will appear here.</p></section>
 </div>
-<footer><label><input type="checkbox" id="exclude"> Exclude my visits on this browser</label><p>Refresh pauses while this tab is hidden. Traffic is an estimate: blockers, privacy preferences and bots can affect counts. No names, email addresses, typed form content or card details are collected here. A visit is a browser session, not an identified person.</p></footer>
+<footer><label><input type="checkbox" id="exclude"> Exclude my ToonClipz visits on this browser</label><p>Refresh pauses while this tab is hidden. Traffic is an estimate: blockers, privacy preferences and bots can affect counts. No names, email addresses, typed form content or card details are collected here. A visit is a browser session, not an identified person.</p></footer>
 </section>
 </main></body></html>
