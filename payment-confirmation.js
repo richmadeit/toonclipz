@@ -17,7 +17,7 @@ function tiktokPurchase(p){
 
       }(window, document, 'ttq');
     }
-    window.ttq.track('Purchase',{value:p.amount/100,currency:p.currency.toUpperCase(),content_type:'product',contents:[{content_id:'toonclipz-15-second',content_name:'ToonClipz 15-second music video',quantity:1}]},{event_id:p.eventId});
+    window.ttq.track('Purchase',{value:p.amount/100,currency:p.currency.toUpperCase(),content_type:'product',contents:[{content_id:'toonclipz-30-second',content_name:'ToonClipz 30-second music video',quantity:1}]},{event_id:p.eventId});
     try{localStorage.setItem(key,'queued');}catch{}
   }catch(_){console.warn('[ToonClipz tracking] TikTok unavailable; payment remains confirmed.');}
 }
@@ -28,7 +28,7 @@ function purchase(p){
   try{if(localStorage.getItem(key))return;}catch{}
   const f=window;
   if(!f.fbq){const n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=true;n.version='2.0';n.queue=[];const s=document.createElement('script');s.async=true;s.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(s);f.fbq('init','1066699776252161');}
-  f.fbq('track','Purchase',{value:p.amount/100,currency:p.currency.toUpperCase(),content_name:'ToonClipz 15-second music video'},{eventID:p.eventId});
+  f.fbq('track','Purchase',{value:p.amount/100,currency:p.currency.toUpperCase(),content_name:'ToonClipz 30-second music video'},{eventID:p.eventId});
   try{localStorage.setItem(key,'queued');}catch{}
 }
 async function check(){
