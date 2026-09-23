@@ -41,3 +41,11 @@ test('Stripe counts only paid live $25 store checkouts, deducts refunds, paginat
   assert.equal((await readPurchases({},now)).available,false);
   await assert.rejects(readPurchases({STRIPE_SECRET_KEY:'placeholder',STRIPE_PAYMENT_LINK_IDS:'plink_store'},now,async()=>new Response('',{status:401})));
 });
+
+test('dashboard counts $60 mic-drop orders separately from other brand links and retains legacy orders',async()=>{
+ const base={livemode:true,mode:'payment',status:'complete',payment_status:'paid',currency:'usd',amount_subtotal:6000,amount_total:6000,created:Math.floor(now/1000),payment_intent:{latest_charge:{amount_refunded:0}},payment_link:{id:'plink_new',url:'https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04'}};
+ const fetcher=async url=>{assert.ok(url.searchParams.getAll('expand[]').includes('data.payment_link'));return Response.json({has_more:false,data:[base,{...base,payment_link:{id:'plink_other',url:'https://buy.stripe.com/unrelated'}},{...base,livemode:false},{...base,amount_subtotal:100},{...base,amount_subtotal:2500,amount_total:2500,payment_link:{id:'plink_old',url:'https://buy.stripe.com/legacy'}}]});};
+ const result=await readPurchases({STRIPE_SECRET_KEY:'test-only-placeholder',STRIPE_PAYMENT_LINK_IDS:'plink_old'},now-1000,fetcher);
+ assert.equal(result.count,2);assert.equal(result.gross,8500);
+ assert.equal((await readPurchases({STRIPE_SECRET_KEY:'test-only-placeholder'},now-1000,fetcher)).count,1);
+});

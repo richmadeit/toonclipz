@@ -151,14 +151,14 @@
             <p class="tc-proof-views"><strong>37.2K</strong>views on this music-video post</p>
             <dl class="tc-proof-metrics"><div><dt>Likes</dt><dd>2,106</dd></div><div><dt>Shares</dt><dd>49</dd></div><div><dt>Saves</dt><dd>150</dd></div><div><dt>New followers</dt><dd>18</dd></div></dl>
           </div>
-          <a class="tc-proof-evidence" href="assets/proof/music-37k.avif" target="_blank" rel="noopener" data-proof-title="45.19-second music post · 37.2K views" data-proof-note="TikTok Studio screenshot: post published July 9, 2026; analytics updated September 18, 2026. Includes 9.0-second average watch time and 5.56% full-video completion. This older example is longer than the current 15-second offer." aria-label="Enlarge the TikTok Studio screenshot showing 37.2K views, 2,106 likes and 18 new followers">
+          <a class="tc-proof-evidence" href="assets/proof/music-37k.avif" target="_blank" rel="noopener" data-proof-title="45.19-second music post · 37.2K views" data-proof-note="TikTok Studio screenshot: post published July 9, 2026; analytics updated September 18, 2026. Includes 9.0-second average watch time and 5.56% full-video completion. This older example is longer than the current 30-second offer." aria-label="Enlarge the TikTok Studio screenshot showing 37.2K views, 2,106 likes and 18 new followers">
             <img src="assets/proof/music-37k.avif" width="416" height="903" loading="lazy" decoding="async" alt="TikTok Studio analytics for a 45.19-second ToonClipz music video: 37.2K views, 2,106 likes, 49 comments, 49 shares, 150 saves and 18 new followers."><span>Open the actual analytics ↗</span>
           </a>
-          <p class="tc-proof-caption">Posted July 9, 2026. Earlier, longer example; the current offer is 15 seconds.</p>
+          <p class="tc-proof-caption">Posted July 9, 2026. Earlier, longer example; the current offer is 30 seconds.</p>
         </article>
       </div>
       </details>
-      <div class="tc-proof-actions"><a class="apply-link" href="#previewIntent">Get my ToonClip — $25 ↗</a><a class="text-link" href="https://www.tiktok.com/@toon_clipz_?lang=en" target="_blank" rel="noopener noreferrer">Visit @toon_clipz_ on TikTok ↗</a></div>
+      <div class="tc-proof-actions"><a class="apply-link" href="#previewIntent">Get my ToonClip — $60 ↗</a><a class="text-link" href="https://www.tiktok.com/@toon_clipz_?lang=en" target="_blank" rel="noopener noreferrer">Visit @toon_clipz_ on TikTok ↗</a></div>
       <p class="tc-proof-note">Selected past results from ToonClipz posts, shown as captured in the supplied screenshots. Combined views are approximate, not unique viewers. Results vary; views, followers and sales are not guaranteed. The Tota Mc repost applies to the conversation post shown, not the DDG example, and does not imply endorsement or partnership.</p>
     `;
     showcase.insertAdjacentElement('afterend', section);

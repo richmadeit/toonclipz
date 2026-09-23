@@ -9,14 +9,17 @@ export default async function handler(request){
   const test=id.startsWith('cs_test_');
   const key=process.env[test?'STRIPE_TEST_SECRET_KEY':'STRIPE_SECRET_KEY'];
   const allowed=(process.env[test?'STRIPE_TEST_PAYMENT_LINK_IDS':'STRIPE_PAYMENT_LINK_IDS']||'').split(',').map(x=>x.trim()).filter(Boolean);
-  if(!key||!allowed.length) return reply(503,{error:'Payment verification is temporarily unavailable. Please keep your Stripe receipt; do not pay again.'});
+  if(!key||(test&&!allowed.length)) return reply(503,{error:'Payment verification is temporarily unavailable. Please keep your Stripe receipt; do not pay again.'});
   try{
     const url=new URL('https://api.stripe.com/v1/checkout/sessions/'+id);
     url.searchParams.append('expand[]','payment_intent.latest_charge');
+    url.searchParams.append('expand[]','payment_link');
     const res=await fetch(url,{headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(10000)});
     if(!res.ok) return reply(res.status===404?404:502,{error:'Unable to verify this payment. Keep your Stripe receipt and try again shortly.'});
     const s=await res.json();
-    if(s.livemode!==!test||s.mode!=='payment'||!allowed.includes(s.payment_link)) return reply(404,{error:'Payment not found for this store'});
+    const linkId=typeof s.payment_link==='string'?s.payment_link:s.payment_link?.id;
+    const currentOffer=!test && s.payment_link?.url==='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04';
+    if(s.livemode!==!test||s.mode!=='payment'||!(currentOffer||allowed.includes(linkId))) return reply(404,{error:'Payment not found for this store'});
     if(s.status!=='complete'||s.payment_status!=='paid') return reply(200,{paid:false,test,status:s.status==='expired'?'expired':'pending'});
     const charge=s.payment_intent?.latest_charge;
     const card=charge?.payment_method_details?.card;

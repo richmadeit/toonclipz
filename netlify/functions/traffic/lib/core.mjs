@@ -1,6 +1,6 @@
 import {createHash, createHmac, timingSafeEqual} from 'node:crypto';
 
-export const EVENTS = Object.freeze({page_view:'Page viewed',get_started:'Get started clicked',form_start:'Form started',photos_ready:'3–5 photos added',song_ready:'Song selected',clip_selected:'15 seconds selected',details_saved:'Order details saved',checkout:'Checkout opened',form_error:'Upload failed',video_play:'Example played'});
+export const EVENTS = Object.freeze({page_view:'Page viewed',get_started:'Get started clicked',form_start:'Form started',photos_ready:'3–5 photos added',song_ready:'Song selected',clip_selected:'Song section selected',details_saved:'Order details saved',checkout:'Checkout opened',form_error:'Upload failed',video_play:'Example played'});
 const SOURCES = ['instagram','facebook','tiktok','google','direct','other'];
 export const json=(status,data,headers={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 export function sameOrigin(req){return req.headers.get('origin')===new URL(req.url).origin;}
@@ -65,17 +65,22 @@ export async function readTraffic(store,since,now=Date.now()){
 }
 export async function readPurchases(env,since,fetcher=fetch,brand='toonclipz'){
   const key=env.STRIPE_SECRET_KEY,allowed=(env.STRIPE_PAYMENT_LINK_IDS||'').split(',').map(x=>x.trim()).filter(Boolean);
-  if(!key||(brand!=='richmadeit'&&!allowed.length))return {available:false,reason:'Live Stripe verification is not configured.'};
+  if(!key)return {available:false,reason:'Live Stripe verification is not configured.'};
   let after;const payments=[];let truncated=false;
   for(let page=0;page<5;page++){
     const url=new URL('https://api.stripe.com/v1/checkout/sessions');
     url.searchParams.set('limit','100');url.searchParams.set('created[gte]',String(Math.floor(since/1000)));
-    url.searchParams.append('expand[]','data.payment_intent.latest_charge');if(brand==='richmadeit')url.searchParams.append('expand[]','data.payment_link');if(after)url.searchParams.set('starting_after',after);
+    url.searchParams.append('expand[]','data.payment_intent.latest_charge');url.searchParams.append('expand[]','data.payment_link');if(after)url.searchParams.set('starting_after',after);
     const res=await fetcher(url,{headers:{Authorization:'Bearer '+key},signal:AbortSignal.timeout(10000)});
     if(!res.ok)throw new Error('Stripe unavailable');
     const data=await res.json();
     for(const s of data.data){
-      if(!s.livemode||s.mode!=='payment'||s.status!=='complete'||s.payment_status!=='paid'||!(brand==='richmadeit'?s.payment_link?.url==='https://buy.stripe.com/dRm6oI4wB0yHaA7crx2wU03':allowed.includes(s.payment_link))||s.currency!=='usd'||s.amount_subtotal!==(brand==='richmadeit'?5000:2500))continue;
+      const linkId=typeof s.payment_link==='string'?s.payment_link:s.payment_link?.id;
+      const currentOffer=s.payment_link?.url==='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04';
+      const belongs=brand==='richmadeit'
+        ? s.payment_link?.url==='https://buy.stripe.com/dRm6oI4wB0yHaA7crx2wU03' && s.amount_subtotal===5000
+        : (currentOffer && s.amount_subtotal===6000) || (allowed.includes(linkId) && s.amount_subtotal===2500);
+      if(!s.livemode||s.mode!=='payment'||s.status!=='complete'||s.payment_status!=='paid'||!belongs||s.currency!=='usd')continue;
       const charge=s.payment_intent?.latest_charge;
       // A missing expansion cannot safely be reported as zero refunds.
       if(!charge||typeof charge!=='object')throw new Error('Stripe charge details unavailable');

@@ -19,3 +19,16 @@ test('verification fails closed and separates paid, pending, wrong-store and san
     globalThis.fetch=async()=>{throw new Error('secret-bearing upstream failure')};r=await handler(request(id));assert.equal(r.status,502);assert.ok(!(await r.text()).includes('secret-bearing'));
   }finally{globalThis.fetch=oldFetch;delete process.env.STRIPE_TEST_SECRET_KEY;delete process.env.STRIPE_TEST_PAYMENT_LINK_IDS;}
 });
+
+test('new live mic-drop link is verified from Stripe expansion; unrelated and sandbox links are rejected',async()=>{
+ const oldFetch=globalThis.fetch,oldKey=process.env.STRIPE_SECRET_KEY;
+ process.env.STRIPE_SECRET_KEY='test-only-placeholder';
+ let s={livemode:true,mode:'payment',status:'complete',payment_status:'paid',amount_total:6000,currency:'usd',payment_link:{id:'plink_new',url:'https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04'}};
+ globalThis.fetch=async url=>{assert.ok(url.searchParams.getAll('expand[]').includes('payment_link'));return Response.json(s);};
+ try{
+  const id='cs_live_abcdefghijklmnop';
+  let r=await(await handler(request(id))).json();assert.equal(r.paid,true);assert.equal(r.amount,6000);
+  s.payment_link.url='https://buy.stripe.com/unrelated';assert.equal((await handler(request(id))).status,404);
+  s.payment_link.url='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04';s.livemode=false;assert.equal((await handler(request(id))).status,404);
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
+});
