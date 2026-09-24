@@ -1,6 +1,27 @@
 // This offer has its own verifier. The $60 custom-video checkout cannot unlock it.
 const LOGIN='https://richmadeit.netlify.app/university/workbook-login.html';
 const CHECKOUT='https://buy.stripe.com/5kQ14o7INbdlbEbajp2wU05';
+const STORAGE='https://molqlfdjlmnlkscecngz.supabase.co';
+const OBJECT='/paid-workbooks/Richmadeit-University-Interactive-Workbook.html';
+
+// This is a short-lived file capability, not a public bucket or a user approval.
+export async function courseDelivery(env,requestStorage=fetch){
+  if(env.TOON_METHOD_AUTOMATIC_COURSE_ENABLED!=='true')return {mode:'manual',url:LOGIN};
+  if(!env.TOON_METHOD_STORAGE_KEY)return {mode:'unavailable'};
+  try{
+    const response=await requestStorage(STORAGE+'/storage/v1/object/sign'+OBJECT,{
+      method:'POST',headers:{'Content-Type':'application/json',apikey:env.TOON_METHOD_STORAGE_KEY,Authorization:'Bearer '+env.TOON_METHOD_STORAGE_KEY},
+      body:JSON.stringify({expiresIn:120}),signal:AbortSignal.timeout(8000)
+    });
+    if(!response.ok)return {mode:'unavailable'};
+    const data=await response.json();
+    const raw=data.signedURL??data.signedUrl;
+    if(typeof raw!=='string')return {mode:'unavailable'};
+    const url=new URL(raw.startsWith('/object/')?'/storage/v1'+raw:raw,STORAGE);
+    if(url.origin!==STORAGE||url.pathname!=='/storage/v1/object/sign'+OBJECT||!url.searchParams.get('token')||url.username||url.password||url.hash)return {mode:'unavailable'};
+    return {mode:'automatic',url:url.href,expiresIn:120};
+  }catch{return {mode:'unavailable'};}
+}
 const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers:{
   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
   'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'
@@ -29,7 +50,7 @@ export function checkSession(session,id,linkId){
   return 'verified';
 }
 
-export function createHandler({env=process.env,requestStripe=fetch}={}){
+export function createHandler({env=process.env,requestStripe=fetch,requestStorage=fetch}={}){
   return async function handler(request){
     if(request.method!=='POST')return reply(405,{status:'invalid_request'});
     const origin=request.headers.get('origin');
@@ -51,7 +72,8 @@ export function createHandler({env=process.env,requestStripe=fetch}={}){
       if(!response.ok)return reply(response.status===404?404:502,{status:'verification_unavailable'});
       const state=checkSession(await response.json(),id,linkId);
       if(state!=='verified')return reply(state==='wrong_offer'?404:200,{status:state});
-      return reply(200,{status:'verified',workbookUrl:LOGIN,telegramUrl:telegramInvite(env.TOON_METHOD_TELEGRAM_INVITE)});
+      const course=await courseDelivery(env,requestStorage);
+      return reply(200,{status:'verified',course,workbookUrl:course.url??null,telegramUrl:telegramInvite(env.TOON_METHOD_TELEGRAM_INVITE)});
     }catch{return reply(502,{status:'verification_unavailable'});}
   };
 }
