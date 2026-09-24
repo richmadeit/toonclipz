@@ -8,6 +8,7 @@
   "description": "ToonClipz website and private activity dashboard",
   "scripts": {
     "build": "node scripts/build-site.mjs",
-    "test:activity": "node --test tests/activity.test.mjs tests/payment-verification.test.mjs"
+    "test:activity": "node --test tests/activity.test.mjs tests/payment-verification.test.mjs",
+    "test:toon-method": "node --test tests/toon-method-access.test.mjs"
   }
 }
