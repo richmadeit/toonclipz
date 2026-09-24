@@ -1,12 +1,13 @@
 # ToonClipz
 
-The homepage presents The Toon Method, a $49 one-time clipper education offer with manual DM purchase and personal buyer delivery. The previous $60 custom-video application and Stripe checkout are preserved at `/custom-video/`.
+The homepage remains the $60 custom-video application and Stripe order flow. The separate `/toon-method/` route presents a $49 learn-it-yourself package for clippers. Buyer payment and delivery are handled personally by DM.
 
 ## Routes
 
 | Path | Purpose |
 | --- | --- |
-| `/` | Clipper-focused Toon Method sales page |
+| `/` | $60 ToonClipz custom-video application and payment flow |
+| `/toon-method/` | $49 Toon Method lesson offer for clippers |
 | `/custom-video/` | Existing $60 custom-video application and payment flow |
 | Portfolio videos | Existing media hosted at `https://richmadeit.netlify.app/preview/` |
 | `/admin.html`, `/queue.html` | Existing legacy live-giveaway tools; these do not receive campaign applications |
