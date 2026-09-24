@@ -65,3 +65,29 @@ test('public offer exposes only checkout URL and stays manual until explicitly r
   assert.ok(!JSON.stringify(offerConfig(env)).includes('testInvite'));
   assert.ok(!JSON.stringify(offerConfig(env)).includes(env.STRIPE_SECRET_KEY));
 });
+
+
+test('paid buyer receives immediate private course access even with no Telegram invite',async()=>{
+ let storageCalls=0;
+ const h=createHandler({env:{...env,TOON_METHOD_AUTOMATIC_COURSE_ENABLED:'true',TOON_METHOD_STORAGE_KEY:'storage-fixture',TOON_METHOD_TELEGRAM_INVITE:''},requestStripe:async()=>new Response(JSON.stringify(paid())),requestStorage:async(url,options)=>{
+  storageCalls++;assert.equal(url,'https://molqlfdjlmnlkscecngz.supabase.co/storage/v1/object/sign/paid-workbooks/Richmadeit-University-Interactive-Workbook.html');
+  assert.equal(JSON.parse(options.body).expiresIn,120);
+  return new Response(JSON.stringify({signedURL:'/object/sign/paid-workbooks/Richmadeit-University-Interactive-Workbook.html?token=fixture'}));
+ }});
+ const response=await h(req());const data=await response.json();
+ assert.equal(data.course.mode,'automatic');assert.equal(data.telegramUrl,null);assert.equal(storageCalls,1);
+ assert.equal(data.course.expiresIn,120);assert.ok(!JSON.stringify(data).includes('storage-fixture'));
+});
+test('unpaid or refunded buyer never requests a course URL',async()=>{
+ for(const session of [{...paid(),payment_status:'unpaid'},{...paid(),payment_link:'plink_wrong'},(()=>{const s=paid();s.payment_intent.latest_charge.refunded=true;return s;})()]){
+  let calls=0;
+  const h=createHandler({env:{...env,TOON_METHOD_AUTOMATIC_COURSE_ENABLED:'true',TOON_METHOD_STORAGE_KEY:'fixture'},requestStripe:async()=>new Response(JSON.stringify(session)),requestStorage:async()=>{calls++;throw Error('unexpected');}});
+  const data=await(await h(req())).json();assert.equal(calls,0);assert.equal(data.course,undefined);
+ }
+});
+test('course storage failures and unsafe URLs never fall back to approval or leak keys',async()=>{
+ for(const raw of ['https://evil.example/object?token=x','/object/sign/other/file.html?token=x','/object/sign/paid-workbooks/Richmadeit-University-Interactive-Workbook.html',null]){
+  const h=createHandler({env:{...env,TOON_METHOD_AUTOMATIC_COURSE_ENABLED:'true',TOON_METHOD_STORAGE_KEY:'private-fixture'},requestStripe:async()=>new Response(JSON.stringify(paid())),requestStorage:async()=>new Response(JSON.stringify({signedURL:raw}))});
+  const data=await(await h(req())).json();assert.equal(data.status,'verified');assert.equal(data.course.mode,'unavailable');assert.equal(data.workbookUrl,null);assert.ok(!JSON.stringify(data).includes('private-fixture'));
+ }
+});
