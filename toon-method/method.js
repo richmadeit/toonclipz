@@ -34,7 +34,7 @@ document.querySelectorAll('[data-comparison]').forEach(card=>{
     const cta=document.getElementById('purchase-cta');
     cta.href=url.href;cta.textContent='Get The Toon Method · $49 ↗';
     cta.setAttribute('aria-label','Buy The Toon Method for $49 through Stripe');
-    document.getElementById('purchase-details').textContent='Pay securely through Stripe. After checkout, follow the buyer access steps for your workbook and free Telegram group. Workbook access is approved personally.';
+    document.getElementById('purchase-details').textContent='Pay securely through Stripe. After payment verification, open your course immediately. No course approval needed. Your included Telegram group has a separate join request that Rich approves personally.';
   }catch{/* Keep the working Instagram purchase request as the fallback. */}
 })();
 // Render only verified data from the server-side TikTok Display API connection.
