@@ -15,6 +15,14 @@ test('verified $49 live payment receives the configured private group URL',async
   assert.equal(data.telegramUrl,env.TOON_METHOD_TELEGRAM_INVITE);
   assert.equal(response.headers.get('cache-control'),'no-store');
 });
+test('without an explicit link ID, only the exact verified Stripe link unlocks access',async()=>{
+  for(const [url,expected] of [['https://buy.stripe.com/5kQ14o7INbdlbEbajp2wU05','verified'],['https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04','wrong_offer'],['https://evil.example','wrong_offer']]){
+    const session={...paid(),payment_link:{id:'plink_actual',url}};
+    const data=await (await handler(session,{TOON_METHOD_PAYMENT_LINK_ID:undefined})(req())).json();
+    assert.equal(data.status,expected);
+    if(expected!=='verified')assert.equal(data.telegramUrl,undefined);
+  }
+});
 test('wrong offer, test mode, unpaid, incomplete, refund, dispute and missing charge never reveal invite',async()=>{
   const fixtures=[
     {...paid(),payment_link:'plink_custom60'}, {...paid(),amount_subtotal:6000}, {...paid(),currency:'eur'},
