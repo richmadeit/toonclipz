@@ -1,14 +1,13 @@
 # ToonClipz
 
-The homepage is the recovered ToonClipz music-video campaign: apply free,
-review a watermarked 15-second preview if selected, and pay $20 to unlock
-that exact clip. No payment is collected by the application form.
+The homepage presents The Toon Method, a $49 one-time clipper education offer with manual DM purchase and personal buyer delivery. The previous $60 custom-video application and Stripe checkout are preserved at `/custom-video/`.
 
 ## Routes
 
 | Path | Purpose |
 | --- | --- |
-| `/` | ToonClipz campaign and artist application |
+| `/` | Clipper-focused Toon Method sales page |
+| `/custom-video/` | Existing $60 custom-video application and payment flow |
 | Portfolio videos | Existing media hosted at `https://richmadeit.netlify.app/preview/` |
 | `/admin.html`, `/queue.html` | Existing legacy live-giveaway tools; these do not receive campaign applications |
 | `/rich-buys-iphone/` | Separate repair-chip preorder storefront |
