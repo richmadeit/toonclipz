@@ -214,11 +214,10 @@
   video.addEventListener('error',fallback);video.querySelector('source').addEventListener('error',fallback);
   video.addEventListener('play',()=>{status.textContent='Now playing · Full 15-second example';if(typeof audioEl!=='undefined'&&audioEl)audioEl.pause();});
   video.addEventListener('ended',()=>{status.textContent='Your song could be next. Get started below.';});
-  document.getElementById('pbtn').addEventListener('click',()=>video.pause());
-  const form=document.getElementById('f');
-  form.addEventListener('submit',()=>video.pause());
+  document.getElementById('pbtn')?.addEventListener('click',()=>video.pause());
+  document.getElementById('f')?.addEventListener('submit',()=>video.pause());
   const receipt=document.getElementById('receipt');
-  new MutationObserver(()=>{if(receipt.style.display==='block')document.querySelector('.mobile-cta').hidden=true;}).observe(receipt,{attributes:true,attributeFilter:['style']});
+  if(receipt)new MutationObserver(()=>{if(receipt.style.display==='block')document.querySelector('.mobile-cta').hidden=true;}).observe(receipt,{attributes:true,attributeFilter:['style']});
 })();
 // Pause the other players when visitors watch a result or preview their own song.
 (() => {
@@ -249,5 +248,5 @@
   const example=document.getElementById('showreel');
   customer?.addEventListener('play',()=>{example.pause();if(typeof audioEl!=='undefined'&&audioEl)audioEl.pause();});
   example.addEventListener('play',()=>customer?.pause());
-  document.getElementById('pbtn').addEventListener('click',()=>customer?.pause());
+  document.getElementById('pbtn')?.addEventListener('click',()=>customer?.pause());
 })();

@@ -46,7 +46,9 @@ async function check(){
     for(const [id,value]of Object.entries({amount:money(p.amount),tax:money(p.tax),method:p.method,email:p.email||'See your Stripe receipt',reference:p.reference}))$(id).textContent=value;
     $('details').hidden=false;
     if(p.receipt){$('receipt').href=p.receipt;$('receipt').hidden=false;}
-    if(!p.hasOrderReference)$('next').textContent='This payment has no linked website submission. Contact ToonClipz with your receipt so we can match your photos, song section, and mood before starting.';
+    $('next').textContent='Send your photos and song below so we can begin. If you already sent them, use this reference when you message ToonClipz. Typically ready in 1–6 hours after payment and complete materials.';
+    $('uploadMaterials').href='/submit/?ref='+encodeURIComponent(p.reference);
+    $('uploadMaterials').hidden=!!(p.test||p.refunded);
     if(p.test||p.refunded)$('next').textContent=p.test?'Sandbox verification is complete. Test payments are excluded from live advertising Purchase tracking.':'Contact ToonClipz if you have questions about this refunded payment.';
     purchase(p);
   }catch(e){$('title').textContent='We couldn’t check your payment';$('message').textContent=e.message;$('retry').hidden=false;}
