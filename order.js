@@ -11,10 +11,12 @@
   const $=id=>document.getElementById(id);
   const qs=new URLSearchParams(location.search);
   const preview=qs.get('mode')==='preview';
+  const tierMatch=(qs.get('ref')||'').match(/^TC-(15|30|60)-/);
+  const duration=tierMatch?Number(tierMatch[1]):null;
   const reference=(qs.get('ref')||'').trim().slice(0,80);
   if(reference)$('orderRef').value=reference;
   $('pageTitle').textContent=preview?'See your ToonClipz look first':'Send your photos or song';
-  $('pageIntro').textContent=preview?'Send one clear photo. We will create a still starting-frame preview for you to review before payment. We will not make a video preview.':'Upload your song, your photos, or both. If you paid first, include your order reference from the Stripe confirmation. You can send the remaining files later.';
+  $('pageIntro').textContent=preview?'Send one clear photo. We will create a still starting-frame preview for you to review before payment. We will not make a video preview.':'Upload your photos and song, enter the exact song start time, and add your creative idea. Use your checkout reference so we can match your files to your paid package.';
   $('photoLabel').textContent=preview?'Your photo (required for preview)':'Your photos (optional if sending song)';
   $('orderRef').required=false;
   $('orderRefHelp').textContent=preview?'If you already have an order reference, add it here.':'Paid already? Use the reference from your Stripe confirmation. If you started in DMs, we will create a reference for these files.';
@@ -48,8 +50,8 @@
       for(const photo of photos)paths.push(await upload(photo,'photo'));
       const songPath=song?await upload(song,'song'):null;
       const clean=x=>x.trim().replace(/[\r\n|]+/g,' ').slice(0,500);
-      const contact='Email: '+clean($('email').value)+' | Requested look: ToonClipz signature cartoon (DDG example look) | Source: toonclipz | Offer: '+(preview?'STILL PHOTO PREVIEW REQUEST - no payment yet':'MATERIALS UPLOAD - confirm Stripe payment before production')+' | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
-      const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,mood:clean($('notes').value)||'ToonClipz stage performance',photo_paths:paths,song_path:songPath,song_url:null,start_time:'',end_time:'',style:'realistic'});
+      const contact='Email: '+clean($('email').value)+' | Requested look: GTA-inspired AI music video | Source: toonclipz | Offer: '+(preview?'STILL PHOTO PREVIEW REQUEST - no payment yet':'MATERIALS UPLOAD - confirm Stripe payment before production')+' | Requested duration: '+(duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
+      const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,mood:clean($('notes').value)||'GTA-inspired music video',photo_paths:paths,song_path:songPath,song_url:null,start_time:'',end_time:'',style:'realistic'});
       if(error)throw error;
       form.hidden=true;
       $('uploadDone').hidden=false;
