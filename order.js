@@ -8,8 +8,10 @@
   if(reference)$('orderRef').value=reference;
   const visualStyle=$('visualStyle'),portfolio=window.toonclipzPortfolio;
   if(visualStyle&&portfolio)visualStyle.value=portfolio.read(reference)||'';
+  const syncAnimalOptions=()=>{if($('animalOptions'))$('animalOptions').hidden=visualStyle?.value!=='characters';};
+  visualStyle?.addEventListener('change',syncAnimalOptions);syncAnimalOptions();
   $('pageTitle').textContent='Send your song and photos';
-  $('pageIntro').textContent='Upload your photos and song, enter the exact song start time, and add your creative idea. Use your checkout reference so we can match your files to your paid package.';
+  $('pageIntro').textContent='Send your song, choose your visual style and add your creative idea. Want an animal artist? Choose Original character below; no face photo needed. Use your checkout reference so we can match your files to your paid package.';
   $('photoLabel').textContent='Your photos (optional if sending song)';
   $('orderRef').required=true;
   $('orderRefHelp').textContent='Use the order reference from your Stripe confirmation. Keep the same reference for any additional files.';
@@ -47,7 +49,7 @@
       const songPath=song?await upload(song,'song'):null;
       const clean=x=>x.trim().replace(/[\r\n|]+/g,' ').slice(0,500);
       const preferredStyle=portfolio?.styles[visualStyle?.value]||'ToonClipz directs';
-      const contact='Email: '+clean($('email').value)+' | Requested look: '+preferredStyle+' | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
+      const contact='Email: '+clean($('email').value)+' | Requested look: '+preferredStyle+(visualStyle?.value==='characters'?' | Animal artist: '+clean($('animalChoice')?.value||'Help me choose'):'')+' | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
       const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,photo_paths:paths,song_path:songPath||'',song_url:null,start_time:'',end_time:'',style:'realistic'});
       if(error)throw error;
       window.toonclipzActivity?.('details_saved');
