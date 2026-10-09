@@ -14,3 +14,5 @@
   });
   if(ready===3)document.getElementById('checkoutStatus').textContent='Secure checkout. Upload your photos and song after payment.';
 })();
+
+(()=>{const video=document.getElementById('fullFilm'),button=document.getElementById('playFullFilm');if(!video||!button)return;button.hidden=false;button.addEventListener('click',()=>{button.hidden=true;video.play().catch(()=>{button.hidden=false;});});video.addEventListener('play',()=>{button.hidden=true;});video.addEventListener('ended',()=>{button.hidden=false;});})();
