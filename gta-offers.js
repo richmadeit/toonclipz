@@ -18,7 +18,7 @@
 
 (()=>{const video=document.getElementById('fullFilm'),button=document.getElementById('playFullFilm');if(!video||!button)return;button.hidden=false;button.addEventListener('click',()=>{button.hidden=true;video.play().catch(()=>{button.hidden=false;});});video.addEventListener('play',()=>{button.hidden=true;});video.addEventListener('ended',()=>{button.hidden=false;});})();
 
-(()=>{const v=document.querySelector('.hero-preview');if(v&&matchMedia('(prefers-reduced-motion: reduce)').matches){v.pause();v.removeAttribute('autoplay');}const full=document.getElementById('fullFilm');full?.addEventListener('play',()=>v?.pause());})();
+(()=>{const previews=[...document.querySelectorAll('.hero-preview')];if(matchMedia('(prefers-reduced-motion: reduce)').matches)previews.forEach(v=>{v.pause();v.removeAttribute('autoplay');});})();
 
 (()=>{
   const portfolio=window.toonclipzPortfolio,dialog=document.getElementById('portfolioDialog'),player=document.getElementById('portfolioPlayer');
@@ -44,4 +44,4 @@
   refresh();
 })();
 
-(()=>{const videos=[...document.querySelectorAll("video")];videos.forEach(current=>current.addEventListener("play",()=>videos.forEach(other=>{if(other!==current)other.pause();})));})();
+(()=>{const videos=[...document.querySelectorAll("video")];videos.forEach(current=>current.addEventListener("play",()=>{if(current.classList.contains("hero-preview"))return;videos.forEach(other=>{if(other!==current)other.pause();});}));})();
