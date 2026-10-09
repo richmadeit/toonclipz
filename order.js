@@ -3,7 +3,7 @@
   if(!form)return;
   const $=id=>document.getElementById(id);
   const qs=new URLSearchParams(location.search);
-  const tierMatch=(qs.get('ref')||'').match(/^TC-(15|30|60)-/);
+  const tierMatch=(qs.get('ref')||'').match(/^TC-(15|30|60|180)-/);
   const duration=tierMatch?Number(tierMatch[1]):null;
   const reference=(qs.get('ref')||'').trim().slice(0,80);
   if(reference)$('orderRef').value=reference;
@@ -41,7 +41,7 @@
       for(const photo of photos)paths.push(await upload(photo,'photo'));
       const songPath=song?await upload(song,'song'):null;
       const clean=x=>x.trim().replace(/[\r\n|]+/g,' ').slice(0,500);
-      const contact='Email: '+clean($('email').value)+' | Requested look: GTA-inspired AI music video | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
+      const contact='Email: '+clean($('email').value)+' | Requested look: GTA-inspired AI music video | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
       const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,mood:clean($('notes').value)||'GTA-inspired music video',photo_paths:paths,song_path:songPath,song_url:null,start_time:'',end_time:'',style:'realistic'});
       if(error)throw error;
       form.hidden=true;

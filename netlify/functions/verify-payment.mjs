@@ -19,6 +19,7 @@ export default async function handler(request){
     const s=await res.json();
     const linkId=typeof s.payment_link==='string'?s.payment_link:s.payment_link?.id;
     const gtaOffers={"https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06":{"duration":15,"amount":2500},"https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07":{"duration":30,"amount":5000},"https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08":{"duration":60,"amount":9900}};
+    gtaOffers["https://buy.stripe.com/8x2aEY1kpchp9w3bnt2wU09"]={duration:180,amount:30000};
     const gtaOffer=!test && gtaOffers[s.payment_link?.url];
     const currentOffer=!test && (s.payment_link?.url==='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04'||!!gtaOffer);
     if(gtaOffer&&(s.currency!=='usd'||s.amount_subtotal!==gtaOffer.amount))return reply(404,{error:'Payment does not match the selected package'});

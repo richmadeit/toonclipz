@@ -36,7 +36,7 @@ test('new live mic-drop link is verified from Stripe expansion; unrelated and sa
 test('GTA packages verify exact subtotal and currency and return the paid duration',async()=>{
  const oldFetch=globalThis.fetch,oldKey=process.env.STRIPE_SECRET_KEY;
  process.env.STRIPE_SECRET_KEY='test-only-placeholder';
- const offers=[[15,2500,'https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06'],[30,5000,'https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07'],[60,9900,'https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08']];
+ const offers=[[15,2500,'https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06'],[30,5000,'https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07'],[60,9900,'https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08'],[180,30000,'https://buy.stripe.com/8x2aEY1kpchp9w3bnt2wU09']];
  let s;globalThis.fetch=async()=>Response.json(s);
  try{for(const [duration,amount,url]of offers){
   s={livemode:true,mode:'payment',status:'complete',payment_status:'paid',amount_total:amount,amount_subtotal:amount,currency:'usd',payment_link:{url}};
