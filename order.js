@@ -11,7 +11,7 @@
   const syncAnimalOptions=()=>{if($('animalOptions'))$('animalOptions').hidden=visualStyle?.value!=='characters';};
   visualStyle?.addEventListener('change',syncAnimalOptions);syncAnimalOptions();
   $('pageTitle').textContent='Send your song and photos';
-  $('pageIntro').textContent='Send your song, choose your visual style and add your creative idea. Want an animal artist? Choose Original character below; no face photo needed. Use your checkout reference so we can match your files to your paid package.';
+  $('pageIntro').textContent='Send your song, choose your visual style and add your creative idea. Want an animal artist? Choose Cinematic Animal Characters below; no face photo needed. Use your checkout reference so we can match your files to your paid package.';
   $('photoLabel').textContent='Your photos (optional if sending song)';
   $('orderRef').required=true;
   $('orderRefHelp').textContent='Use the order reference from your Stripe confirmation. Keep the same reference for any additional files.';
