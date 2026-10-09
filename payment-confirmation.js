@@ -1,8 +1,30 @@
 (()=>{
 const $=id=>document.getElementById(id);
-const session=new URLSearchParams(location.search).get('session_id');
-// Remove the bearer-like session reference before loading analytics or following links.
-history.replaceState(null,'',location.pathname);
+const recoveryKey='toonclipz.payment-confirmation';
+const recoveryLifetime=24*60*60*1000;
+const validSession=id=>typeof id==='string'&&/^cs_(test|live)_[A-Za-z0-9]{12,200}$/.test(id);
+const incomingSession=new URLSearchParams(location.search).get('session_id');
+let recovery=null;
+if(incomingSession!==null){
+  if(validSession(incomingSession))recovery={session:incomingSession,expiresAt:Date.now()+recoveryLifetime};
+}else{
+  // Only retain the checkout reference, never a cached payment verdict. Reloads
+  // must verify the current payment status with Stripe again.
+  try{recovery=JSON.parse(sessionStorage.getItem(recoveryKey));}catch{}
+  if(!recovery)recovery=history.state?.toonclipzPayment;
+  if(!recovery||!validSession(recovery.session)||!Number.isFinite(recovery.expiresAt)||recovery.expiresAt<=Date.now()||recovery.expiresAt>Date.now()+recoveryLifetime)recovery=null;
+}
+const session=recovery?.session;
+try{if(recovery)sessionStorage.setItem(recoveryKey,JSON.stringify(recovery));else sessionStorage.removeItem(recoveryKey);}catch{}
+// Strip the reference before loading analytics. History state also permits a
+// refresh when the browser has disabled sessionStorage.
+history.replaceState(recovery?{toonclipzPayment:recovery}:null,'',location.pathname);
+function packageSummary(duration){
+  if(duration===180)return 'Your full GTA-inspired AI music video: up to 3 minutes, one artist, up to six scene concepts, one minor revision round, and one 15-second teaser cut from the finished video.';
+  const scenes={15:'one scene concept',30:'up to two scene concepts',60:'up to three scene concepts'};
+  if(scenes[duration])return `Your ${duration}-second GTA-inspired AI music video includes one artist, ${scenes[duration]}, and a clean vertical MP4. Extras and revisions are quoted separately.`;
+  return 'Your custom ToonClipz video package is listed on your Stripe receipt.';
+}
 function tiktokPurchase(p){
   if(!p.paid||p.test||p.refunded||!p.eventId)return;
   if(window.navigator.globalPrivacyControl===true||window.toonclipzTikTokConsent===false)return;
@@ -22,8 +44,9 @@ function tiktokPurchase(p){
   }catch(_){console.warn('[ToonClipz tracking] TikTok unavailable; payment remains confirmed.');}
 }
 function purchase(p){
+  if(!p.paid||!p.eventId)return;
   tiktokPurchase(p);
-  if(p.test||p.refunded)return;
+  if(p.test||p.refunded||window.navigator.globalPrivacyControl===true||window.toonclipzAnalyticsConsent===false)return;
   const key='toonclipz.purchase.'+p.eventId;
   try{if(localStorage.getItem(key))return;}catch{}
   const f=window;
@@ -33,6 +56,7 @@ function purchase(p){
 }
 async function check(){
   $('retry').hidden=true;
+  for(const id of ['details','status','receipt','uploadMaterials'])$(id).hidden=true;
   if(!session){$('title').textContent='Your payment confirmation';$('message').textContent='After checkout, Stripe will bring you here with your payment details. If you already paid, keep your Stripe receipt—do not pay again.';return;}
   $('title').textContent='Checking your payment…';
   try{
@@ -45,6 +69,7 @@ async function check(){
     $('status').hidden=false;$('status').textContent=p.test?'SANDBOX':p.refunded?'REFUNDED':'PAID';
     for(const [id,value]of Object.entries({amount:money(p.amount),tax:money(p.tax),method:p.method,email:p.email||'See your Stripe receipt',reference:p.reference}))$(id).textContent=value;
     $('details').hidden=false;
+    $('packageSummary').textContent=packageSummary(p.duration);
     if(p.receipt){$('receipt').href=p.receipt;$('receipt').hidden=false;}
     $('next').textContent='Send your photos and song below so we can begin. If you already sent them, keep this order reference. We will email delivery updates after we have your complete materials.';
     $('uploadMaterials').href='/submit/?ref='+encodeURIComponent(p.reference);

@@ -9,6 +9,7 @@
   "scripts": {
     "build": "node scripts/build-site.mjs",
     "test:activity": "node --test tests/activity.test.mjs tests/payment-verification.test.mjs",
-    "test:toon-method": "node --test tests/toon-method-access.test.mjs"
+    "test:toon-method": "node --test tests/toon-method-access.test.mjs",
+    "test:conversion": "node --test tests/activity.test.mjs tests/payment-verification.test.mjs tests/tiktok-purchase.test.mjs tests/payment-confirmation-ui.test.mjs tests/materials-upload.test.mjs"
   }
 }

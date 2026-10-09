@@ -11,9 +11,11 @@
     const bytes=crypto.getRandomValues(new Uint8Array(8));
     const ref='TC-'+tier+'-'+Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('');
     u.searchParams.set('client_reference_id',ref);a.href=u.href;a.removeAttribute('aria-disabled');ready++;
-    a.addEventListener('click',()=>{if(typeof fbq==='function')fbq('track','InitiateCheckout',{value:offer.price,currency:'USD',content_ids:['gta-'+tier],content_type:'product'});});
+    a.addEventListener('click',()=>{if(navigator.globalPrivacyControl!==true&&window.toonclipzAnalyticsConsent!==false&&typeof fbq==='function')fbq('track','InitiateCheckout',{value:offer.price,currency:'USD',content_ids:['gta-'+tier],content_type:'product'});});
   });
   if(ready===Object.keys(offers).length)document.getElementById('checkoutStatus').textContent='Secure checkout. Upload your photos and song after payment.';
 })();
 
 (()=>{const video=document.getElementById('fullFilm'),button=document.getElementById('playFullFilm');if(!video||!button)return;button.hidden=false;button.addEventListener('click',()=>{button.hidden=true;video.play().catch(()=>{button.hidden=false;});});video.addEventListener('play',()=>{button.hidden=true;});video.addEventListener('ended',()=>{button.hidden=false;});})();
+
+(()=>{const v=document.querySelector('.hero-preview');if(v&&matchMedia('(prefers-reduced-motion: reduce)').matches){v.pause();v.removeAttribute('autoplay');}const full=document.getElementById('fullFilm');full?.addEventListener('play',()=>v?.pause());})();

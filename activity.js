@@ -22,11 +22,13 @@
   }catch{/* Analytics must never interrupt an order. */}}
   window.toonclipzActivity=track;
   track('page_view');
-  document.getElementById('f')?.addEventListener('input',()=>track('form_start'),{once:true});
+  document.querySelector('#materialsForm, #f')?.addEventListener('input',()=>track('form_start'),{once:true});
+  document.getElementById('photos')?.addEventListener('change',e=>{if(e.target.files?.length)track('photos_ready');});
+  document.getElementById('song')?.addEventListener('change',e=>{if(e.target.files?.length)track('song_ready');});
   document.addEventListener('click',e=>{
     const link=e.target.closest('a');if(!link)return;
-    if(link.getAttribute('href')==='#previewIntent')track('get_started');
-    if(link.id==='checkoutLink')track('checkout');
+    if(['#previewIntent','#packages','#full-video'].includes(link.getAttribute('href')))track('get_started');
+    if(link.id==='checkoutLink'||link.matches('.checkout[href]'))track('checkout');
   });
-  document.querySelectorAll('video').forEach(v=>v.addEventListener('play',()=>track('video_play'),{once:true}));
+  document.querySelectorAll('video:not(.hero-preview)').forEach(v=>v.addEventListener('play',()=>track('video_play'),{once:true}));
 })();

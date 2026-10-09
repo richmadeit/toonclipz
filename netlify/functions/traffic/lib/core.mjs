@@ -1,6 +1,6 @@
 import {createHash, createHmac, timingSafeEqual} from 'node:crypto';
 
-export const EVENTS = Object.freeze({page_view:'Page viewed',get_started:'Get started clicked',form_start:'Form started',photos_ready:'3–5 photos added',song_ready:'Song selected',clip_selected:'Song section selected',details_saved:'Order details saved',checkout:'Checkout opened',form_error:'Upload failed',video_play:'Example played'});
+export const EVENTS = Object.freeze({page_view:'Page viewed',get_started:'Get started clicked',form_start:'Form started',photos_ready:'Photos selected',song_ready:'Song selected',clip_selected:'Song section selected',details_saved:'Order details saved',checkout:'Checkout opened',form_error:'Upload failed',video_play:'Example played'});
 const SOURCES = ['instagram','facebook','tiktok','google','direct','other'];
 export const json=(status,data,headers={})=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers}});
 export function sameOrigin(req){return req.headers.get('origin')===new URL(req.url).origin;}
@@ -77,9 +77,11 @@ export async function readPurchases(env,since,fetcher=fetch,brand='toonclipz'){
     for(const s of data.data){
       const linkId=typeof s.payment_link==='string'?s.payment_link:s.payment_link?.id;
       const currentOffer=s.payment_link?.url==='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04';
+      const gtaOffers={'https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06':2500,'https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07':5000,'https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08':9900,'https://buy.stripe.com/8x2aEY1kpchp9w3bnt2wU09':30000};
+      const gtaAmount=gtaOffers[s.payment_link?.url];
       const belongs=brand==='richmadeit'
         ? s.payment_link?.url==='https://buy.stripe.com/dRm6oI4wB0yHaA7crx2wU03' && s.amount_subtotal===5000
-        : (currentOffer && s.amount_subtotal===6000) || (allowed.includes(linkId) && s.amount_subtotal===2500);
+        : (gtaAmount!==undefined && s.amount_subtotal===gtaAmount) || (currentOffer && s.amount_subtotal===6000) || (allowed.includes(linkId) && s.amount_subtotal===2500);
       if(!s.livemode||s.mode!=='payment'||s.status!=='complete'||s.payment_status!=='paid'||!belongs||s.currency!=='usd')continue;
       const charge=s.payment_intent?.latest_charge;
       // A missing expansion cannot safely be reported as zero refunds.

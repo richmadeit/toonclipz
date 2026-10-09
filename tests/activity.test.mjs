@@ -49,3 +49,14 @@ test('dashboard counts $60 mic-drop orders separately from other brand links and
  assert.equal(result.count,2);assert.equal(result.gross,8500);
  assert.equal((await readPurchases({STRIPE_SECRET_KEY:'test-only-placeholder'},now-1000,fetcher)).count,1);
 });
+
+test('dashboard counts all four current GTA packages with exact prices and rejects unrelated or mismatched checkouts',async()=>{
+ const base={livemode:true,mode:'payment',status:'complete',payment_status:'paid',currency:'usd',created:Math.floor(now/1000),payment_intent:{latest_charge:{amount_refunded:0}}};
+ const offers=[['https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06',2500],['https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07',5000],['https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08',9900],['https://buy.stripe.com/8x2aEY1kpchp9w3bnt2wU09',30000]];
+ const rows=offers.flatMap(([url,amount])=>[{...base,payment_link:{url},amount_subtotal:amount,amount_total:amount},{...base,payment_link:{url},amount_subtotal:amount-1,amount_total:amount-1}]);
+ rows.push({...base,payment_link:{url:'https://buy.stripe.com/unrelated'},amount_subtotal:30000,amount_total:30000});
+ const fetcher=async()=>Response.json({data:rows,has_more:false});
+ const result=await readPurchases({STRIPE_SECRET_KEY:'test-only-placeholder'},now-1000,fetcher);
+ assert.equal(result.count,4);assert.equal(result.gross,47400);assert.equal(result.refunds,0);
+ assert.equal((await readPurchases({STRIPE_SECRET_KEY:'test-only-placeholder'},now-1000,fetcher,'richmadeit')).count,0);
+});
