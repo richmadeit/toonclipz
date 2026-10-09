@@ -16,7 +16,7 @@
 .upload-page{max-width:630px;margin:0 auto;padding:28px 20px 100px;background:#08070a;color:#f8f5ed;font:16px/1.5 'Barlow',system-ui,sans-serif}
 .upload-page .quick-order{margin:25px 0}
 .upload-page label{display:block;margin:15px 0 5px;color:#f1ebf3}
-.upload-page input,.upload-page textarea{display:block;width:100%;padding:13px;background:#25202a;color:#fff;border:1px solid #696172;border-radius:7px;font:inherit}
+.upload-page input,.upload-page textarea,.upload-page select{display:block;width:100%;padding:13px;background:#25202a;color:#fff;border:1px solid #696172;border-radius:7px;font:inherit}
 .upload-page input[type=file]{position:static;clip:auto;width:100%;height:auto;opacity:1;padding:12px}
 .upload-page textarea{min-height:70px}
 .upload-page .hint{font-size:13px;color:#c9c3cc}

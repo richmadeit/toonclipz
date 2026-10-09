@@ -19,3 +19,25 @@
 (()=>{const video=document.getElementById('fullFilm'),button=document.getElementById('playFullFilm');if(!video||!button)return;button.hidden=false;button.addEventListener('click',()=>{button.hidden=true;video.play().catch(()=>{button.hidden=false;});});video.addEventListener('play',()=>{button.hidden=true;});video.addEventListener('ended',()=>{button.hidden=false;});})();
 
 (()=>{const v=document.querySelector('.hero-preview');if(v&&matchMedia('(prefers-reduced-motion: reduce)').matches){v.pause();v.removeAttribute('autoplay');}const full=document.getElementById('fullFilm');full?.addEventListener('play',()=>v?.pause());})();
+
+(()=>{
+  const portfolio=window.toonclipzPortfolio,dialog=document.getElementById('portfolioDialog'),player=document.getElementById('portfolioPlayer');
+  if(!portfolio||!dialog||!player)return;
+  const selected=document.getElementById('selectedStyle'),label=document.getElementById('selectedStyleName'),dialogChoice=document.getElementById('dialogChooseStyle');
+  function refresh(){const id=portfolio.read();selected.hidden=!id;label.textContent=id?portfolio.styles[id]:'';document.querySelectorAll('[data-choose-style]').forEach(a=>{if(a.dataset.chooseStyle===id)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');});}
+  function close(){dialog.close();}
+  document.querySelectorAll('[data-choose-style]').forEach(a=>a.addEventListener('click',()=>{portfolio.choose(a.dataset.chooseStyle);refresh();if(dialog.open)close();}));
+  document.getElementById('clearStyle').addEventListener('click',()=>{portfolio.choose(null);refresh();});
+  document.querySelectorAll('.checkout').forEach(a=>a.addEventListener('click',()=>{portfolio.rememberOrder(new URL(a.href).searchParams.get('client_reference_id'));}));
+  document.querySelectorAll('[data-portfolio-video]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('video').forEach(v=>v.pause());
+    document.getElementById('portfolioDialogTitle').textContent=portfolio.styles[button.dataset.style];
+    dialogChoice.dataset.chooseStyle=button.dataset.style;
+    player.poster=button.querySelector('img').src;player.src=button.dataset.portfolioVideo;
+    dialog.showModal();document.body.classList.add('portfolio-open');player.play().catch(()=>{});
+  }));
+  document.getElementById('closePortfolio').addEventListener('click',close);
+  dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
+  dialog.addEventListener('close',()=>{player.pause();player.removeAttribute('src');player.load();document.body.classList.remove('portfolio-open');});
+  refresh();
+})();

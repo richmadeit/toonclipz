@@ -6,6 +6,8 @@
   const getDuration=ref=>{const match=ref.match(/^TC-(15|30|60|180)-/);return match?Number(match[1]):null;};
   const reference=(qs.get('ref')||'').trim().slice(0,80);
   if(reference)$('orderRef').value=reference;
+  const visualStyle=$('visualStyle'),portfolio=window.toonclipzPortfolio;
+  if(visualStyle&&portfolio)visualStyle.value=portfolio.read(reference)||'';
   $('pageTitle').textContent='Send your song and photos';
   $('pageIntro').textContent='Upload your photos and song, enter the exact song start time, and add your creative idea. Use your checkout reference so we can match your files to your paid package.';
   $('photoLabel').textContent='Your photos (optional if sending song)';
@@ -44,7 +46,8 @@
       for(const photo of photos)paths.push(await upload(photo,'photo'));
       const songPath=song?await upload(song,'song'):null;
       const clean=x=>x.trim().replace(/[\r\n|]+/g,' ').slice(0,500);
-      const contact='Email: '+clean($('email').value)+' | Requested look: GTA-inspired AI music video | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
+      const preferredStyle=portfolio?.styles[visualStyle?.value]||'ToonClipz directs';
+      const contact='Email: '+clean($('email').value)+' | Requested look: '+preferredStyle+' | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
       const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,photo_paths:paths,song_path:songPath||'',song_url:null,start_time:'',end_time:'',style:'realistic'});
       if(error)throw error;
       window.toonclipzActivity?.('details_saved');
