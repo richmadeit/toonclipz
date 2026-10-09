@@ -1,5 +1,5 @@
 (()=>{
-  const styles=Object.freeze({'gta-cinematic':'GTA-Inspired Cinematic','red-room':'Original ToonClipz - Red room','pink-stage':'Original ToonClipz - Pink room','beach':'Original ToonClipz - Beach','concert-stage':'Original ToonClipz - Concert','characters':'Cinematic Animal Characters','custom':'My own idea'});
+  const styles=Object.freeze({'gta-cinematic':'GTA-Inspired Cinematic','gta-female':'GTA Female — Main Character','red-room':'Original ToonClipz - Red room','pink-stage':'Original ToonClipz - Pink room','beach':'Original ToonClipz - Beach','concert-stage':'Original ToonClipz - Concert','characters':'Cinematic Animal Characters','custom':'My own idea'});
   const prefix='toonclipz_style_v1',lifetime=7*24*60*60*1000;
   const safeRef=ref=>/^TC-(15|30|60|180)-[a-f0-9]{16}$/.test(ref||'');
   function load(key){try{const raw=localStorage.getItem(key);if(!raw)return undefined;const p=JSON.parse(raw);if(!p||!Number.isFinite(p.savedAt)||p.savedAt>Date.now()||Date.now()-p.savedAt>lifetime||!(p.id===null||Object.hasOwn(styles,p.id))){localStorage.removeItem(key);return undefined;}return p.id;}catch{return undefined;}}

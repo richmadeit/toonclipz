@@ -43,3 +43,5 @@
   dialog.addEventListener('close',()=>{player.pause();player.removeAttribute('src');player.load();document.body.classList.remove('portfolio-open');});
   refresh();
 })();
+
+(()=>{const videos=[...document.querySelectorAll("video")];videos.forEach(current=>current.addEventListener("play",()=>videos.forEach(other=>{if(other!==current)other.pause();})));})();
