@@ -33,6 +33,7 @@
     document.querySelectorAll('video').forEach(v=>v.pause());
     document.getElementById('portfolioDialogTitle').textContent=button.dataset.portfolioTitle||portfolio.styles[button.dataset.style];
     dialogChoice.hidden=button.dataset.portfolioOnly==='true';
+    dialogChoice.style.display=dialogChoice.hidden?'none':'';
     dialogChoice.dataset.chooseStyle=button.dataset.style||'';
     player.poster=button.querySelector('img').src;player.src=button.dataset.portfolioVideo;
     dialog.showModal();document.body.classList.add('portfolio-open');player.play().catch(()=>{});
