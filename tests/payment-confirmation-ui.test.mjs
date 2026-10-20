@@ -105,3 +105,13 @@ test('privacy opt-out preserves the receipt without emitting Meta Purchase',asyn
     if(options.gpc)assert.deepEqual(page.events,[]);
   }
 });
+
+test('deposit confirmation reports only $5, explains balance, and offers upload after verified payment',async()=>{
+ const page=await render({payment:{...paid,deposit:true,duration:null,amount:500,reference:'TC-D60-order'}});
+ assert.equal(page.nodes.title.textContent,'Your $5 deposit is confirmed!');
+ assert.match(page.nodes.packageSummary.textContent,/\$85 remaining/);
+ assert.equal(page.nodes.uploadMaterials.href,'/submit/?ref=TC-D60-order');
+ assert.equal(page.nodes.uploadMaterials.hidden,false);
+ const purchase=page.events.find(e=>e[0]==='meta'&&e[2]==='Purchase');
+ assert.equal(purchase[3].value,5);assert.equal(purchase[3].content_name,'ToonClipz $5 Video Deposit');
+});

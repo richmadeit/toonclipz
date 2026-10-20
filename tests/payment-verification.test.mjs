@@ -45,3 +45,17 @@ test('GTA packages verify exact subtotal and currency and return the paid durati
   s.amount_subtotal=amount;s.currency='eur';assert.equal((await handler(request('cs_live_abcdefghijklmnop'))).status,404);
  }}finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
 });
+
+test('deposit verifies exactly $5 without treating the video balance as paid',async()=>{
+ const oldFetch=globalThis.fetch,oldKey=process.env.STRIPE_SECRET_KEY;
+ process.env.STRIPE_SECRET_KEY='test-only-placeholder';
+ const s={livemode:true,mode:'payment',status:'complete',payment_status:'paid',currency:'usd',amount_subtotal:500,amount_total:500,payment_link:{url:'https://buy.stripe.com/eVqdRabZ33KTdMjfDJ2wU0b'}};
+ globalThis.fetch=async()=>Response.json(s);
+ try{
+  const id='cs_live_abcdefghijklmnop';
+  let p=await(await handler(request(id))).json();assert.equal(p.paid,true);assert.equal(p.deposit,true);assert.equal(p.duration,null);assert.ok(p.reference.startsWith('TC-D-'));
+  s.payment_status='unpaid';p=await(await handler(request(id))).json();assert.equal(p.paid,false);
+  s.payment_status='paid';s.amount_total=5000;assert.equal((await handler(request(id))).status,404);
+  s.amount_total=500;s.amount_subtotal=50;assert.equal((await handler(request(id))).status,404);
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
+});

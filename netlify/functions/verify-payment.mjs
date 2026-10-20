@@ -21,7 +21,9 @@ export default async function handler(request){
     const gtaOffers={"https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06":{"duration":15,"amount":2500},"https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07":{"duration":30,"amount":5000},"https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08":{"duration":60,"amount":9900}};
     gtaOffers["https://buy.stripe.com/8x2aEY1kpchp9w3bnt2wU09"]={duration:180,amount:30000};
     const gtaOffer=!test && gtaOffers[s.payment_link?.url];
-    const currentOffer=!test && (s.payment_link?.url==='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04'||!!gtaOffer);
+    const deposit=!test && s.payment_link?.url==='https://buy.stripe.com/eVqdRabZ33KTdMjfDJ2wU0b';
+    if(deposit&&(s.currency!=='usd'||s.amount_subtotal!==500||s.amount_total!==500))return reply(404,{error:'Payment does not match the $5 deposit'});
+    const currentOffer=!test && (s.payment_link?.url==='https://buy.stripe.com/dRm4gA5AF0yH23B9fl2wU04'||!!gtaOffer||deposit);
     if(gtaOffer&&(s.currency!=='usd'||s.amount_subtotal!==gtaOffer.amount))return reply(404,{error:'Payment does not match the selected package'});
     if(s.livemode!==!test||s.mode!=='payment'||!(currentOffer||allowed.includes(linkId))) return reply(404,{error:'Payment not found for this store'});
     if(s.status!=='complete'||s.payment_status!=='paid') return reply(200,{paid:false,test,status:s.status==='expired'?'expired':'pending'});
@@ -32,7 +34,7 @@ export default async function handler(request){
     const email=s.customer_details?.email||s.customer_email||'';
     const maskedEmail=email.includes('@')?email.slice(0,1)+'•••@'+email.split('@')[1]:null;
     return reply(200,{paid:true,test,amount:s.amount_total,currency:s.currency,tax:s.total_details?.amount_tax||0,
-      duration:gtaOffer?.duration||null,reference:s.client_reference_id||'TC-'+(gtaOffer?.duration?gtaOffer.duration+'-':'')+id.slice(-10),hasOrderReference:!!s.client_reference_id,
+      deposit:!!deposit,duration:gtaOffer?.duration||null,reference:s.client_reference_id||(deposit?'TC-D-':'TC-')+(gtaOffer?.duration?gtaOffer.duration+'-':'')+id.slice(-10),hasOrderReference:!!s.client_reference_id,
       email:maskedEmail,method:card?card.brand+' •••• '+card.last4:charge?.payment_method_details?.type||'Stripe',receipt,
       refunded:!!charge?.refunded,eventId:'tc_'+createHash('sha256').update(id).digest('hex').slice(0,32)});
   }catch{return reply(502,{error:'Unable to check payment right now. Please try again; do not pay again.'});}

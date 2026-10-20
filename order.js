@@ -3,9 +3,10 @@
   if(!form)return;
   const $=id=>document.getElementById(id);
   const qs=new URLSearchParams(location.search);
-  const getDuration=ref=>{const match=ref.match(/^TC-(15|30|60|180)-/);return match?Number(match[1]):null;};
+  const getDuration=ref=>{const match=ref.match(/^TC-(?:D)?(15|30|60|180)-/);return match?Number(match[1]):null;};
   const reference=(qs.get('ref')||'').trim().slice(0,80);
   if(reference)$('orderRef').value=reference;
+  const isDeposit=()=>/^TC-D(?:30|60|180)?-/.test($('orderRef').value);
   const visualStyle=$('visualStyle'),portfolio=window.toonclipzPortfolio;
   if(visualStyle&&portfolio)visualStyle.value=portfolio.read(reference)||'';
   const syncAnimalOptions=()=>{if($('animalOptions'))$('animalOptions').hidden=visualStyle?.value!=='characters';};
@@ -16,7 +17,7 @@
   $('orderRef').required=true;
   $('orderRefHelp').textContent='Use the order reference from your Stripe confirmation. Keep the same reference for any additional files.';
   $('materialsSubmit').textContent='Send my files';
-  function updatePackageHint(){const full=getDuration($('orderRef').value)===180;$('songSectionHelp').textContent=full?'For your full video, upload the complete song and include its total length. Tell us your scene ideas and outfit. Songs over 3 minutes are $100 per additional minute, arranged by email.':'Enter the exact song timestamp where your clip should start. Include your scene idea and outfit reference.';}
+  function updatePackageHint(){if(isDeposit()){$('songSectionHelp').textContent='Choose your package in your notes: 30 seconds ($50 total), 1 minute ($90), or 3 minutes ($250). Your $5 deposit counts toward it. Add your song timestamp, one outfit and one stage idea for your 15-second preview.';return;}const full=getDuration($('orderRef').value)===180;$('songSectionHelp').textContent=full?'For your full video, upload the complete song and include its total length. Tell us your scene ideas and outfit. Songs over 3 minutes are $100 per additional minute, arranged by email.':'Enter the exact song timestamp where your clip should start. Include your scene idea and outfit reference.';}
   $('orderRef').addEventListener('input',()=>{$('orderRef').value=$('orderRef').value.replace(/[^a-zA-Z0-9-]/g,'').slice(0,80);updatePackageHint();});
   updatePackageHint();
   const supabase=window.supabase?.createClient('https://molqlfdjlmnlkscecngz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vbHFsZmRqbG1ubGtzY2Vjbmd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1ODEzNjMsImV4cCI6MjA5MzE1NzM2M30._CR9A4H7-E7CYzIWdEO4PgRcCgBcORP2wAZqXrXE4Ec',{global:{fetch:(url,options={})=>fetch(url,{...options,signal:AbortSignal.timeout(String(url).includes('/storage/')?120000:20000)})}});
@@ -49,7 +50,7 @@
       const songPath=song?await upload(song,'song'):null;
       const clean=x=>x.trim().replace(/[\r\n|]+/g,' ').slice(0,500);
       const preferredStyle=portfolio?.styles[visualStyle?.value]||'ToonClipz directs';
-      const contact='Email: '+clean($('email').value)+' | Requested look: '+preferredStyle+(visualStyle?.value==='characters'?' | Animal artist: '+clean($('animalChoice')?.value||'Help me choose'):'')+' | Source: toonclipz | Offer: '+'MATERIALS UPLOAD - confirm Stripe payment before production'+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
+      const contact='Email: '+clean($('email').value)+' | Requested look: '+preferredStyle+(visualStyle?.value==='characters'?' | Animal artist: '+clean($('animalChoice')?.value||'Help me choose'):'')+' | Source: toonclipz | Offer: '+(isDeposit()?'$5 DEPOSIT MATERIALS - confirm deposit in Stripe; preview only until balance is paid':'MATERIALS UPLOAD - confirm Stripe payment before production')+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
       const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,photo_paths:paths,song_path:songPath||'',song_url:null,start_time:'',end_time:'',style:'realistic'});
       if(error)throw error;
       window.toonclipzActivity?.('details_saved');
