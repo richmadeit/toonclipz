@@ -13,3 +13,5 @@
 .hero-gta-stack{display:grid;gap:28px;min-width:0}.hero-gta-stack .hero-preview{height:auto;aspect-ratio:4/3;object-fit:contain;background:#000}
 /* Keep the deposit action visible before the longer portfolio. */
 header{align-items:start;padding-top:30px;gap:44px}header h1{font-size:clamp(64px,7vw,88px);margin:14px 0}header .intro{margin:14px 0}header .hero-offer{margin:16px 0 0}nav{justify-content:space-between}nav>.checkout{margin-left:auto}@media(max-width:760px){header h1{font-size:clamp(52px,14vw,70px)}header{padding-top:20px}header .eyebrow{font-size:10px}header .button{display:block;text-align:center}}
+
+.group-offer{margin:22px 0;padding:20px 22px;border:1px solid #cbb47c;border-radius:12px;background:#17131e;color:#f8f5ed}.group-offer strong{color:#e9c878;font-size:22px}.group-offer p{max-width:820px;line-height:1.6;color:#ddd4e4}.group-offer a{color:#e9c878;font-weight:700}

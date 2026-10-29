@@ -22,4 +22,22 @@
 .upload-page .hint{font-size:13px;color:#c9c3cc}
 .upload-page .status{min-height:24px;color:#f1d183}
 .upload-page .order-button:disabled{opacity:.65;cursor:wait}
+.upload-page,.upload-page *{box-sizing:border-box}
+.upload-page .song-picker{min-width:0;margin:22px 0;padding:18px;border:1px solid #8b7444;border-radius:12px;background:#201b26}
+.upload-page .song-picker[hidden]{display:none}
+.song-picker legend{padding:0 7px;color:#f1d183;font:700 18px 'Space Grotesk',sans-serif}
+.song-picker .hint{margin:6px 0 13px}
+.song-picker-range{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;margin-top:18px;font-size:14px}
+.song-picker-range output{color:#f1d183;font:700 23px 'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums}
+.upload-page .song-picker input[type=range]{height:44px;padding:0;border:0;background:transparent;accent-color:#e9c878;cursor:pointer}
+.song-picker-scale{display:flex;justify-content:space-between;color:#c9c3cc;font-size:12px;font-variant-numeric:tabular-nums}
+.song-picker-actions{display:flex;align-items:center;gap:16px;margin:16px 0}
+.song-picker-actions>div{flex:1;min-width:0}
+.upload-page .song-picker-actions label{margin:0 0 5px;font-size:13px}
+.song-picker-play{flex:1;min-height:48px;padding:12px;border:1px solid #d4af5a;border-radius:8px;background:#d4af5a;color:#130e16;font:700 14px 'Space Grotesk',sans-serif;cursor:pointer}
+.song-picker-play:disabled{opacity:.55;cursor:default}
+.upload-page .song-picker-confirm{display:flex;align-items:flex-start;gap:10px;padding-top:12px;border-top:1px solid #49414e;font-size:14px;cursor:pointer}
+.upload-page .song-picker-confirm input{flex:0 0 20px;width:20px;height:20px;margin:1px 0 0;accent-color:#e9c878}
+.song-picker input:focus-visible,.song-picker button:focus-visible{outline:2px solid #f1d183;outline-offset:4px}
+@media(max-width:400px){.upload-page .quick-order{padding:18px}.upload-page .song-picker{padding:13px}.song-picker-actions{flex-direction:column;align-items:stretch}.song-picker-play{flex:auto}}
 @media(max-width:600px){.order-choices{grid-template-columns:1fr}.look-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.look-grid img{height:225px}}
