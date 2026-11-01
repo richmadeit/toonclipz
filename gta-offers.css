@@ -18,3 +18,15 @@ header{align-items:start;padding-top:30px;gap:44px}header h1{font-size:clamp(64p
 
 /* Keep the Instagram preview button readable against its lime background. */
 .group-offer a.button{color:#0a0d11}
+
+/* Two clear, persistent order paths on desktop and mobile. */
+body{padding-bottom:110px}
+html{scroll-padding-bottom:120px}
+.floating-options{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:12px;width:max-content;max-width:calc(100% - 32px);padding:10px;background:#0a0d11f5;border:1px solid #343b43;border-radius:12px;box-shadow:0 8px 32px #0009}
+.floating-options a{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 22px;border-radius:6px;font-size:15px;font-weight:700;text-decoration:none;text-align:center;border:1px solid #c2fa59}
+.floating-buy{background:#c2fa59;color:#0a0d11}
+.floating-preview{background:transparent;color:#c2fa59}
+.floating-options a:hover{filter:brightness(1.12)}
+.floating-options a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.mobile-label{display:none}
+@media(max-width:640px){.floating-options{bottom:0;left:0;right:0;transform:none;width:auto;max-width:none;border-radius:12px 12px 0 0;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}.floating-options a{flex:1;min-width:0;font-size:14px;padding:12px 6px}.floating-options .desktop-label{display:none}.floating-options .mobile-label{display:inline}}
