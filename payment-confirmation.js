@@ -19,7 +19,8 @@ try{if(recovery)sessionStorage.setItem(recoveryKey,JSON.stringify(recovery));els
 // Strip the reference before loading analytics. History state also permits a
 // refresh when the browser has disabled sessionStorage.
 history.replaceState(recovery?{toonclipzPayment:recovery}:null,'',location.pathname);
-function packageSummary(duration){
+function packageSummary(duration, fullPackage){
+  if(fullPackage)return `Your ${duration}-second custom music video is paid in full. Includes one artist, one outfit, one stage, a vertical MP4 and one minor correction. Upload your materials below so we can begin.`;
   if(duration===180)return 'Your full GTA-inspired AI music video: up to 3 minutes, one artist, up to six scene concepts, one minor revision round, and one 15-second teaser cut from the finished video.';
   const scenes={15:'one scene concept',30:'up to two scene concepts',60:'up to three scene concepts'};
   if(scenes[duration])return `Your ${duration}-second GTA-inspired AI music video includes one artist, ${scenes[duration]}, and a clean vertical MP4. Extras and revisions are quoted separately.`;
@@ -69,7 +70,7 @@ async function check(){
     $('status').hidden=false;$('status').textContent=p.test?'SANDBOX':p.refunded?'REFUNDED':'PAID';
     for(const [id,value]of Object.entries({amount:money(p.amount),tax:money(p.tax),method:p.method,email:p.email||'See your Stripe receipt',reference:p.reference}))$(id).textContent=value;
     $('details').hidden=false;
-    $('packageSummary').textContent=p.deposit?'Your $5 deposit is credited toward your package. After sending your materials, you receive a custom 15-second watermarked preview. Choose 30 seconds ($50 total; $45 remaining), 1 minute ($90; $85 remaining), or 3 minutes ($250; $245 remaining). The balance is due after preview approval, before we finish your video.':packageSummary(p.duration);
+    $('packageSummary').textContent=p.deposit?'Your $5 deposit is credited toward your package. After sending your materials, you receive a custom 15-second watermarked preview. Choose 30 seconds ($50 total; $45 remaining), 1 minute ($90; $85 remaining), or 3 minutes ($250; $245 remaining). The balance is due after preview approval, before we finish your video.':packageSummary(p.duration,p.fullPackage);
     if(p.receipt){$('receipt').href=p.receipt;$('receipt').hidden=false;}
     $('next').textContent=p.deposit?'Next: send your photo and song using the button below. Choose your package in your notes. Keep this reference to return and add materials later. We begin your preview after receiving your materials.':'Send your photos and song below so we can begin. If you already sent them, keep this order reference. We will email delivery updates after we have your complete materials.';
     $('uploadMaterials').href='/submit/?ref='+encodeURIComponent(p.reference);

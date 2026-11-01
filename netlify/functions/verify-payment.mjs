@@ -20,6 +20,9 @@ export default async function handler(request){
     const linkId=typeof s.payment_link==='string'?s.payment_link:s.payment_link?.id;
     const gtaOffers={"https://buy.stripe.com/4gM4gAd37ftB23B8bh2wU06":{"duration":15,"amount":2500},"https://buy.stripe.com/bJe7sM6EJa9h6jR2QX2wU07":{"duration":30,"amount":5000},"https://buy.stripe.com/9B6dRa4wB0yH6jRfDJ2wU08":{"duration":60,"amount":9900}};
     gtaOffers["https://buy.stripe.com/8x2aEY1kpchp9w3bnt2wU09"]={duration:180,amount:30000};
+    gtaOffers["https://buy.stripe.com/3cI5kE7INepxdMj1MT2wU0m"]={"duration": 30, "amount": 5000};
+    gtaOffers["https://buy.stripe.com/6oU7sM4wB0yHgYv1MT2wU0n"]={"duration": 60, "amount": 9000};
+    gtaOffers["https://buy.stripe.com/4gM9AUaUZdltcIf3V12wU0o"]={"duration": 180, "amount": 25000};
     const gtaOffer=!test && gtaOffers[s.payment_link?.url];
     const deposit=!test && s.payment_link?.url==='https://buy.stripe.com/eVqdRabZ33KTdMjfDJ2wU0b';
     if(deposit&&(s.currency!=='usd'||s.amount_subtotal!==500||s.amount_total!==500))return reply(404,{error:'Payment does not match the $5 deposit'});
@@ -34,7 +37,7 @@ export default async function handler(request){
     const email=s.customer_details?.email||s.customer_email||'';
     const maskedEmail=email.includes('@')?email.slice(0,1)+'•••@'+email.split('@')[1]:null;
     return reply(200,{paid:true,test,amount:s.amount_total,currency:s.currency,tax:s.total_details?.amount_tax||0,
-      deposit:!!deposit,duration:gtaOffer?.duration||null,reference:s.client_reference_id||(deposit?'TC-D-':'TC-')+(gtaOffer?.duration?gtaOffer.duration+'-':'')+id.slice(-10),hasOrderReference:!!s.client_reference_id,
+      fullPackage:["https://buy.stripe.com/3cI5kE7INepxdMj1MT2wU0m", "https://buy.stripe.com/6oU7sM4wB0yHgYv1MT2wU0n", "https://buy.stripe.com/4gM9AUaUZdltcIf3V12wU0o"].includes(s.payment_link?.url),deposit:!!deposit,duration:gtaOffer?.duration||null,reference:s.client_reference_id||(deposit?'TC-D-':'TC-')+(gtaOffer?.duration?gtaOffer.duration+'-':'')+id.slice(-10),hasOrderReference:!!s.client_reference_id,
       email:maskedEmail,method:card?card.brand+' •••• '+card.last4:charge?.payment_method_details?.type||'Stripe',receipt,
       refunded:!!charge?.refunded,eventId:'tc_'+createHash('sha256').update(id).digest('hex').slice(0,32)});
   }catch{return reply(502,{error:'Unable to check payment right now. Please try again; do not pay again.'});}

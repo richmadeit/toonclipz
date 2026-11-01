@@ -59,3 +59,12 @@ test('deposit verifies exactly $5 without treating the video balance as paid',as
   s.amount_total=500;s.amount_subtotal=50;assert.equal((await handler(request(id))).status,404);
  }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
 });
+
+test('full-price packages verify exact amounts and preserve purchase values',async()=>{
+ const oldFetch=globalThis.fetch,oldKey=process.env.STRIPE_SECRET_KEY;process.env.STRIPE_SECRET_KEY='test-only-placeholder';
+ const offers=[{"duration": 30, "amount": 5000, "id": "price_1UX1i5JM9upNSRp4KCliNTn3", "url": "https://buy.stripe.com/3cI5kE7INepxdMj1MT2wU0m", "linkId": "plink_1UX1iSJM9upNSRp4Av9bBLaz"}, {"duration": 60, "amount": 9000, "id": "price_1UX1iHJM9upNSRp4V9bIjBvs", "url": "https://buy.stripe.com/6oU7sM4wB0yHgYv1MT2wU0n", "linkId": "plink_1UX1iTJM9upNSRp4RvoNvuHR"}, {"duration": 180, "amount": 25000, "id": "price_1UX1iIJM9upNSRp4RmpomSzc", "url": "https://buy.stripe.com/4gM9AUaUZdltcIf3V12wU0o", "linkId": "plink_1UX1iUJM9upNSRp4WzawlefB"}];let s;globalThis.fetch=async()=>Response.json(s);
+ try{for(const offer of offers){s={livemode:true,mode:'payment',status:'complete',payment_status:'paid',currency:'usd',amount_subtotal:offer.amount,amount_total:offer.amount,payment_link:{url:offer.url}};
+ let p=await(await handler(request('cs_live_abcdefghijklmnop'))).json();assert.equal(p.paid,true);assert.equal(p.fullPackage,true);assert.equal(p.amount,offer.amount);assert.equal(p.duration,offer.duration);assert.equal(p.deposit,false);
+ s.amount_subtotal=500;assert.equal((await handler(request('cs_live_abcdefghijklmnop'))).status,404);
+ }}finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
+});

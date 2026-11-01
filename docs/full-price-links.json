@@ -1,0 +1,23 @@
+[
+  {
+    "duration": 30,
+    "amount": 5000,
+    "id": "price_1UX1i5JM9upNSRp4KCliNTn3",
+    "url": "https://buy.stripe.com/3cI5kE7INepxdMj1MT2wU0m",
+    "linkId": "plink_1UX1iSJM9upNSRp4Av9bBLaz"
+  },
+  {
+    "duration": 60,
+    "amount": 9000,
+    "id": "price_1UX1iHJM9upNSRp4V9bIjBvs",
+    "url": "https://buy.stripe.com/6oU7sM4wB0yHgYv1MT2wU0n",
+    "linkId": "plink_1UX1iTJM9upNSRp4RvoNvuHR"
+  },
+  {
+    "duration": 180,
+    "amount": 25000,
+    "id": "price_1UX1iIJM9upNSRp4RmpomSzc",
+    "url": "https://buy.stripe.com/4gM9AUaUZdltcIf3V12wU0o",
+    "linkId": "plink_1UX1iUJM9upNSRp4WzawlefB"
+  }
+]
