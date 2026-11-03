@@ -11,6 +11,7 @@ function setup({insertError=null,storageError=null,reference='TC-180-example',ph
   el('song').files=song?[{name:'song.mp3',type:'audio/mpeg',size:1000}]:[];
   const client={storage:{from:bucket=>({upload:async(path,file)=>{assert.equal(bucket,'submissions');files.push(path);return {error:storageError};}})},from:table=>({insert:async row=>{assert.equal(table,'submissions');const allowed=['ref','artist_name','contact','photo_paths','song_path','song_url','start_time','end_time','style'];assert.deepEqual(Object.keys(row).sort(),allowed.sort());rows.push(row);return {error:insertError};}})};
   const context=vm.createContext({document:{querySelector:()=>el('materialsForm'),getElementById:el},location:{search:'?ref='+reference},URLSearchParams,crypto:{randomUUID:()=> '00000000-0000-4000-8000-000000000001'},window:{supabase:{createClient:()=>client},toonclipzSongPicker:{validate:()=>selectionError,getSelection:()=>selection,destroy(){}},toonclipzActivity:type=>events.push(type)},console:{warn(){}},AbortSignal,fetch});
+  vm.runInContext(readFileSync(new URL('../order-upload.js',import.meta.url),'utf8'),context);
   vm.runInContext(source,context);
   return {el,events,rows,files,submit:()=>el('materialsForm').listeners.submit({preventDefault(){}})};
 }

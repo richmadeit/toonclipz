@@ -20,8 +20,10 @@
   function updatePackageHint(){if(isDeposit()){$('songSectionHelp').textContent='Choose your package in your notes: 30 seconds ($50 total), 1 minute ($90), or 3 minutes ($250). Your $5 deposit counts toward it. Choose your exact preview section above, then add one outfit and one stage idea here.';return;}const full=getDuration($('orderRef').value)===180;$('songSectionHelp').textContent=full?'For your full video, upload the complete song and choose the section you want for the initial preview above. Tell us your scene ideas and outfit. Songs over 3 minutes are $100 per additional minute, arranged by email.':'Choose your exact 15-second preview section above. Include your scene idea and outfit reference here.';}
   $('orderRef').addEventListener('input',()=>{$('orderRef').value=$('orderRef').value.replace(/[^a-zA-Z0-9-]/g,'').slice(0,80);updatePackageHint();});
   updatePackageHint();
-  const supabase=window.supabase?.createClient('https://molqlfdjlmnlkscecngz.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vbHFsZmRqbG1ubGtzY2Vjbmd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1ODEzNjMsImV4cCI6MjA5MzE1NzM2M30._CR9A4H7-E7CYzIWdEO4PgRcCgBcORP2wAZqXrXE4Ec',{global:{fetch:(url,options={})=>fetch(url,{...options,signal:AbortSignal.timeout(String(url).includes('/storage/')?120000:20000)})}});
+  const apiKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vbHFsZmRqbG1ubGtzY2Vjbmd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1ODEzNjMsImV4cCI6MjA5MzE1NzM2M30._CR9A4H7-E7CYzIWdEO4PgRcCgBcORP2wAZqXrXE4Ec';
+  const supabase=window.supabase?.createClient('https://molqlfdjlmnlkscecngz.supabase.co',apiKey,{global:{fetch:(url,options={})=>fetch(url,{...options,signal:options.signal||AbortSignal.timeout(String(url).includes('/storage/')?600000:30000)})}});
   const status=$('uploadStatus');
+  const transfer=window.toonclipzCreateUploader?.({client:supabase,apiKey,onStatus:message=>{status.textContent=message;}});
   form.addEventListener('submit',async e=>{
     e.preventDefault();
     const picker=window.toonclipzSongPicker;
@@ -42,13 +44,9 @@
     status.textContent='Uploading your files… Keep this page open.';
     const uploaded=[];
     try{
-      const folder=id+'/'+crypto.randomUUID();
       async function upload(file,kind){
-        const suffix=(file.name.split('.').pop()||'file').replace(/[^a-z0-9]/ig,'').slice(0,6).toLowerCase();
-        const path=folder+'/'+kind+'-'+crypto.randomUUID()+'.'+suffix;
-        const {error}=await supabase.storage.from('submissions').upload(path,file,{contentType:file.type||'application/octet-stream'});
-        if(error)throw error;
-        uploaded.push(path);return path;
+        if(!transfer)throw new Error('Upload helper unavailable');
+        const path=await transfer(file,kind,id);uploaded.push(path);return path;
       }
       const paths=[];
       for(const photo of photos)paths.push(await upload(photo,'photo'));
@@ -57,6 +55,7 @@
       const artistCount=['1','2','3','4','5+'].includes($('artistCount')?.value)?$('artistCount').value:'1';
       const preferredStyle=portfolio?.styles[visualStyle?.value]||'ToonClipz directs';
       const contact='Email: '+clean($('email').value)+' | Requested look: '+preferredStyle+(visualStyle?.value==='characters'?' | Animal artist: '+clean($('animalChoice')?.value||'Help me choose'):'')+' | Artists requested: '+artistCount+(artistCount!=='1'?' (custom quote required; base package includes 1)':' (included)')+' | Source: toonclipz | Offer: '+(isDeposit()?'$5 DEPOSIT MATERIALS - confirm deposit in Stripe; preview only until balance is paid':'MATERIALS UPLOAD - confirm Stripe payment before production')+' | Requested duration: '+(duration===180?'up to 180':duration||'confirm paid package')+' seconds | Payment: UNVERIFIED - check Stripe before production | Materials: '+photos.length+' photos; song '+(song?'uploaded':'pending')+(selectedSection?' | Confirmed preview section: '+selectedSection.start+' to '+selectedSection.end:'')+' | Public showcase permission: NO | Creative idea: '+(clean($('notes').value)||'ToonClipz directs');
+      status.textContent='Saving your order details…';
       const {error}=await supabase.from('submissions').insert({ref:id,artist_name:clean($('artist').value)||'Artist',contact,photo_paths:paths,song_path:songPath||'',song_url:null,start_time:selectedSection?.start||'',end_time:selectedSection?.end||'',style:'realistic'});
       if(error)throw error;
       window.toonclipzActivity?.('details_saved');
@@ -68,7 +67,7 @@
       $('uploadDone').scrollIntoView({behavior:'smooth',block:'center'});
     }catch(err){
       window.toonclipzActivity?.('form_error');
-      status.textContent='We could not finish saving your files. Please retry using the same reference. '+(uploaded.length?'Some files may have uploaded; use the same reference.':'');
+      status.textContent='We could not finish saving your files. Your selections are still here. Tap Send my files to resume. If it still fails, reply to our email with your photos and song, or email rich.madeit3@gmail.com and include reference '+id+'.';
       console.warn('Upload incomplete',err);
       button.disabled=false;
     }
