@@ -111,7 +111,7 @@
       if(newDeposit){
         try{sessionStorage.removeItem('toonclipz.deposit-draft.'+depositTier);}catch{}
         $('doneTitle').textContent='Materials saved. Finish your $5 deposit.';
-        $('doneText').textContent='Your materials are saved under this reference. Opening secure Stripe checkout for your $5 deposit. Your preview starts after payment and complete materials.';
+        $('doneText').textContent='Your materials are saved under this reference. Opening secure Stripe checkout for your $5 deposit. Your preview is ready the same day we receive your $5 deposit and all required materials. Your full video takes 24–72 hours after the remaining payment and all required materials are received.';
         $('continuePayment').href=checkoutUrl;$('continuePayment').hidden=false;
         window.toonclipzActivity?.('checkout');
         try{location.assign(checkoutUrl);}catch{}

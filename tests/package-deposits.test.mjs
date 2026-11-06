@@ -97,6 +97,6 @@ test('copy explains the materials-first path, screen recordings and authorized t
   assert.match(html,/No Instagram message needed/);
   assert.match(html,/class="floating-buy" href="#packages" aria-label="Choose your video and start with a \$5 preview"/);
   assert.match(html,/Your \$5 counts toward the total/);
-  assert.equal((html.match(/class="small package-timing">Preview in 24–72 hours after deposit \+ materials/g)||[]).length,3);
-  assert.equal((html.match(/Full payment: 24–72 hours after payment \+ materials/g)||[]).length,3);
+  assert.equal((html.match(/class="small package-timing">Same-day preview after deposit \+ required materials/g)||[]).length,3);
+  assert.equal((html.match(/Full video: 24–72 hours after full payment \+ required materials/g)||[]).length,3);
 });

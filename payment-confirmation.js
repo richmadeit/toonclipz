@@ -95,16 +95,16 @@ async function check(){
     $('status').hidden=false;$('status').textContent=p.test?'SANDBOX':p.refunded?'REFUNDED':'PAID';
     for(const [id,value]of Object.entries({amount:money(p.amount),tax:money(p.tax),method:p.method,email:p.email||'See your Stripe receipt',reference:p.reference}))$(id).textContent=value;
     $('details').hidden=false;
-    $('packageSummary').textContent=p.deposit?'Your $5 deposit is credited toward your package. After sending your materials, you receive a custom 15-second watermarked preview. Choose 30 seconds ($50 total; $45 remaining), 1 minute ($90; $85 remaining), or 3 minutes ($250; $245 remaining). The balance is due after preview approval, before we finish your video.':packageSummary(p.duration,p.fullPackage);
+    $('packageSummary').textContent=p.deposit?'Your $5 deposit is credited toward your package. Your custom 15-second watermarked preview is ready the same day we receive your $5 deposit and all required materials. Choose 30 seconds ($50 total; $45 remaining), 1 minute ($90; $85 remaining), or 3 minutes ($250; $245 remaining). The balance is due after preview approval. Your full video is ready in 24–72 hours after the remaining payment and all required materials are received.':packageSummary(p.duration,p.fullPackage);
     if(p.receipt){$('receipt').href=p.receipt;$('receipt').hidden=false;}
-    $('next').textContent=p.deposit?'Next: send your photo and song using the button below. Choose your package in your notes. Keep this reference to return and add materials later. We begin your preview after receiving your materials.':'Send your photos and song below so we can begin. If you already sent them, keep this order reference. We will email delivery updates after we have your complete materials.';
+    $('next').textContent=p.deposit?'Next: send your photo and song using the button below. Choose your package in your notes. Keep this reference to return and add materials later. Your preview is ready the same day we receive your $5 deposit and all required materials.':'Send your photos and song below so we can begin. If you already sent them, keep this order reference. Your full video is ready in 24–72 hours after full payment and all required materials are received. We will email delivery updates.';
     $('uploadMaterials').href='/submit/?ref='+encodeURIComponent(p.reference);
     $('uploadMaterials').hidden=!!(p.test||p.refunded);
     if(p.test||p.refunded)$('next').textContent=p.test?'Sandbox verification is complete. Test payments are excluded from live advertising Purchase tracking.':'Contact ToonClipz if you have questions about this refunded payment.';
     if(p.deposit&&!p.test&&!p.refunded&&p.orderReady){
       $('title').textContent='Your deposit and materials are confirmed!';
       $('message').textContent='Your $5 payment is matched to your saved materials. Keep your order reference.';
-      $('next').textContent='Your 15-second preview is due in 24–72 hours after your $5 deposit and complete materials. No need to upload the same materials again. You can add anything else using the button below.';
+      $('next').textContent='Your 15-second preview is ready the same day we receive your $5 deposit and all required materials. Your full video is ready in 24–72 hours after the remaining payment and all required materials are received. No need to upload the same materials again. You can add anything else using the button below.';
       $('uploadMaterials').textContent='Add more materials (optional) ↗';
     }else if(p.deposit&&!p.test&&!p.refunded&&p.needsOrderMatch){
       $('message').textContent='Your payment is confirmed. We are still matching it to your saved materials. Do not pay again.';

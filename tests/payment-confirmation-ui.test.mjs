@@ -278,7 +278,7 @@ test('reverification disconnects the prior observer and replaces the frame handl
 
 test('matched materials-first deposits confirm the saved order without asking for duplicate materials',async()=>{
  const page=await render({payment:{...paid,deposit:true,reference:'TC-D30-order',orderReady:true,needsOrderMatch:true}});
- assert.equal(page.nodes.paidIntake.hidden,true);assert.equal(page.nodes.materialsFrame.src,undefined);assert.match(page.nodes.title.textContent,/deposit and materials/);assert.match(page.nodes.next.textContent,/24–72 hours/);assert.match(page.nodes.uploadMaterials.textContent,/optional/);
+ assert.equal(page.nodes.paidIntake.hidden,true);assert.equal(page.nodes.materialsFrame.src,undefined);assert.match(page.nodes.title.textContent,/deposit and materials/);assert.match(page.nodes.next.textContent,/preview is ready the same day/);assert.match(page.nodes.next.textContent,/full video is ready in 24–72 hours after the remaining payment and all required materials/);assert.match(page.nodes.uploadMaterials.textContent,/optional/);
 });
 
 test('paid material matching outages offer retry and never claim the order is ready or request duplicate uploads',async()=>{
