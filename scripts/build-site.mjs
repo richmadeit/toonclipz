@@ -5,8 +5,8 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 // Add future public ToonClipz assets here. Never publish server code, SQL,
 // private buyer content, previews, credentials, or customer records.
 export const WEB_ENTRIES=Object.freeze([
-  'gta-offers.css','gta-offers.js','portfolio.js','status.html','status.css','status.js','activity.js','index.html','admin.html','queue.html','toon.css','toon.js','order.css','order.js','order-upload.js','song-picker.js','payment-confirmation.html','payment-confirmation.js',
-  'assets','obs-assets','rich-buys-iphone','custom-video','toon-method','submit'
+  'hub.css','hub.js','gta-offers.css','gta-offers.js','portfolio.js','status.html','status.css','status.js','activity.js','index.html','admin.html','queue.html','toon.css','toon.js','order.css','order.js','order-upload.js','song-picker.js','payment-confirmation.html','payment-confirmation.js',
+  'assets','obs-assets','rich-buys-iphone','custom-video','toon-method','submit','videos'
 ]);
 export async function build(root=fileURLToPath(new URL('../',import.meta.url))){
   const out=join(root,'dist');
@@ -18,3 +18,4 @@ export async function build(root=fileURLToPath(new URL('../',import.meta.url))){
   return out;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href) await build();
+
