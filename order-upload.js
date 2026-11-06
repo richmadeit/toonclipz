@@ -22,13 +22,15 @@
         onStatus(kind==='photo'?'Preparing your photo…':'Preparing your song…');
         const body=kind==='photo'?await preparePhoto(file):file;
         const suffix=(body.name.split('.').pop()||'file').replace(/[^a-z0-9]/ig,'').slice(0,6).toLowerCase();
-        state={body,path:reference+'/'+crypto.randomUUID()+'/'+kind+'-'+crypto.randomUUID()+'.'+suffix,complete:false};transfers.set(key,state);
+        const mediaTypes={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',aac:'audio/aac',aif:'audio/aiff',aiff:'audio/aiff',flac:'audio/flac',mp4:'video/mp4',m4v:'video/mp4',mov:'video/quicktime',webm:'video/webm',ogg:'audio/ogg',oga:'audio/ogg',opus:'audio/opus'};
+        const contentType=kind==='song'&&!/^(audio|video)\//.test(body.type||'')?(mediaTypes[suffix]||'application/octet-stream'):(body.type||'application/octet-stream');
+        state={body,contentType,path:reference+'/'+crypto.randomUUID()+'/'+kind+'-'+crypto.randomUUID()+'.'+suffix,complete:false};transfers.set(key,state);
       }
       if(state.complete)return state.path;
       const label=kind==='photo'?'photo':'song';
       if(!window.tus?.Upload){
         onStatus('Uploading your '+label+'… Keep this page open.');
-        const {error}=await client.storage.from('submissions').upload(state.path,state.body,{contentType:state.body.type||'application/octet-stream'});
+        const {error}=await client.storage.from('submissions').upload(state.path,state.body,{contentType:state.contentType});
         if(error)throw error;state.complete=true;return state.path;
       }
       return new Promise((resolve,reject)=>{
@@ -39,7 +41,7 @@
           chunkSize:6*1024*1024,uploadDataDuringCreation:false,
           retryDelays:[0,1500,3000,5000],timeout:600000,
           removeFingerprintOnSuccess:true,storeFingerprintForResuming:false,
-          metadata:{bucketName:'submissions',objectName:state.path,contentType:state.body.type||'application/octet-stream',cacheControl:'3600'},
+          metadata:{bucketName:'submissions',objectName:state.path,contentType:state.contentType,cacheControl:'3600'},
           onProgress(sent,total){onStatus('Uploading your '+label+'… '+Math.round(sent/total*100)+'%. Keep this page open.');},
           onShouldRetry(error,attempt,options){
             const code=error.originalResponse?.getStatus();
@@ -54,3 +56,4 @@
     };
   };
 })();
+

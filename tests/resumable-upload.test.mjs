@@ -19,3 +19,11 @@ test('retry resumes the same transfer and path after an interrupted upload',asyn
 test('direct storage uses progress, longer timeout and no file overwrite',async()=>{
  const h=setup();await h.transfer(photo,'photo','TC-D-TEST');const o=h.states[0].options;assert.match(o.endpoint,/\.storage\.supabase\.co\/storage\/v1\/upload\/resumable$/);assert.equal(o.chunkSize,6*1024*1024);assert.equal(o.timeout,600000);assert.equal(o.headers['x-upsert'],'false');assert.equal(o.uploadDataDuringCreation,false);assert.match(h.messages.join(' '),/100%/);assert.equal(o.onShouldRetry({originalResponse:{getStatus:()=>403}}),false);assert.equal(o.onShouldRetry({originalResponse:{getStatus:()=>503}}),true);
 });
+
+
+
+test('phone recordings with omitted browser MIME keep a supported storage content type',async()=>{
+ for(const [name,contentType] of [['phone.m4v','video/mp4'],['phone.mov','video/quicktime'],['song.m4a','audio/mp4']]){
+  const h=setup();await h.transfer({name,type:'',size:2048,lastModified:1},'song','TC-D30-TEST');assert.equal(h.states[0].options.metadata.contentType,contentType);
+ }
+});

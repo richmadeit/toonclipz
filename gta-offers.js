@@ -12,7 +12,7 @@
     u.searchParams.set('client_reference_id',ref);a.href=u.href;a.removeAttribute('aria-disabled');ready++;
     a.addEventListener('click',()=>{if(navigator.globalPrivacyControl!==true&&window.toonclipzAnalyticsConsent!==false&&typeof fbq==='function')fbq('track','InitiateCheckout',{value:offer.price,currency:'USD',content_ids:['gta-'+tier],content_type:'product'});});
   });
-  if(ready>0)document.getElementById('checkoutStatus').textContent='Secure checkout: full package payment. Upload your photos and song after payment.';
+  if(ready>0)document.getElementById('checkoutStatus').textContent='For a $5 preview: send your materials first, then pay securely. Or pay your full package price now.';
 })();
 
 (()=>{const video=document.getElementById('fullFilm'),button=document.getElementById('playFullFilm');if(!video||!button)return;button.hidden=false;button.addEventListener('click',()=>{button.hidden=true;video.play().catch(()=>{button.hidden=false;});});video.addEventListener('play',()=>{button.hidden=true;});video.addEventListener('ended',()=>{button.hidden=false;});})();
@@ -44,3 +44,4 @@
 })();
 
 (()=>{const videos=[...document.querySelectorAll("video")];videos.forEach(current=>current.addEventListener("play",()=>{if(current.classList.contains("hero-preview"))return;videos.forEach(other=>{if(other!==current)other.pause();});}));})();
+

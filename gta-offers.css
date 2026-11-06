@@ -30,3 +30,10 @@ html{scroll-padding-bottom:120px}
 .floating-options a:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .mobile-label{display:none}
 @media(max-width:640px){.floating-options{bottom:0;left:0;right:0;transform:none;width:auto;max-width:none;border-radius:12px 12px 0 0;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom))}.floating-options a{flex:1;min-width:0;font-size:14px;padding:12px 6px}.floating-options .desktop-label{display:none}.floating-options .mobile-label{display:inline}}
+
+/* The $5 preview starts with materials; full payment stays optional. */
+.packages .deposit-start{display:block;width:100%;text-align:center}
+.packages .full-payment{margin-top:16px;background:transparent;color:var(--lime);border:1px solid var(--lime)}
+.packages .full-payment:hover{background:#c2fa5914}
+.packages .deposit-terms,.packages .full-payment-terms{margin:10px 0 0;line-height:1.5;text-align:center;font-size:12px}
+.packages .package-timing{margin:12px 0 0;line-height:1.5;font-size:13px}

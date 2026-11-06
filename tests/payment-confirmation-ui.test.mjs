@@ -17,17 +17,23 @@ function storage(map,unavailable=false){
   };
 }
 async function render(options={}){
-  const nodes=Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map(([,id])=>[id,{textContent:'',hidden:true,href:'',addEventListener(event,handler){this[event]=handler;}}]));
+  const nodes=Object.fromEntries([...html.matchAll(/\bid="([^"]+)"/g)].map(([,id])=>[id,{textContent:'',hidden:true,href:'',style:{},scrollIntoView(){this.scrolled=true;},removeAttribute(name){delete this[name];},addEventListener(event,handler){this[event]=handler;}}]));
   const sessionStore=options.sessionStore??new Map(),localStore=options.localStore??new Map();
   const location={search:options.search??'?session_id='+checkout,pathname:'/payment-confirmation.html'};
   const history={state:options.historyState??null,replaceState(state,_title,path){this.state=state;this.path=path;location.search='';}};
-  const events=[],requests=[];
+  const events=[],requests=[],resizeObservers=[];
   const window={navigator:{globalPrivacyControl:options.gpc===true},toonclipzAnalyticsConsent:options.analyticsConsent,fbq:(...args)=>events.push(['meta',...args]),ttq:{_i:{DAN48FRC77U1ARFV6OF0:[]},track:(...args)=>events.push(['tiktok',...args])}};
+  if(options.resizeObserver)window.ResizeObserver=class {
+    constructor(callback){this.callback=callback;this.disconnected=false;resizeObservers.push(this);}
+    observe(target){this.target=target;}
+    disconnect(){this.disconnected=true;}
+    notify(){if(!this.disconnected)this.callback([{target:this.target}]);}
+  };
   const context={document:{getElementById:id=>nodes[id]},location,history,window,sessionStorage:storage(sessionStore,options.storageDisabled),localStorage:storage(localStore,options.storageDisabled),URLSearchParams,Intl,console,
-    fetch:async(url,request)=>{requests.push({url,...request});return {ok:true,json:async()=>options.payment??paid};}};
+    fetch:async(url,request)=>{requests.push({url,...request});if(options.fetchResponse)return options.fetchResponse(requests.length);if(options.networkError)throw new Error('Network unavailable');return {ok:!options.serverError,json:async()=>options.payment??paid};}};
   vm.runInNewContext(source,context);
   await new Promise(resolve=>setImmediate(resolve));
-  return {nodes,events,requests,history,location,sessionStore,localStore};
+  return {nodes,events,requests,history,location,sessionStore,localStore,resizeObservers};
 }
 
 test('confirmation renders each verified package, including the full-video scope without a delivery promise',async()=>{
@@ -114,4 +120,168 @@ test('deposit confirmation reports only $5, explains balance, and offers upload 
  assert.equal(page.nodes.uploadMaterials.hidden,false);
  const purchase=page.events.find(e=>e[0]==='meta'&&e[2]==='Purchase');
  assert.equal(purchase[3].value,5);assert.equal(purchase[3].content_name,'ToonClipz $5 Video Deposit');
+});
+
+
+
+test('verified live deposits immediately show the existing paid form with the same reference',async()=>{
+ for(const reference of ['TC-D-example','TC-D30-example','TC-D60-example','TC-D180-example']){
+  const page=await render({payment:{...paid,deposit:true,amount:500,reference}});
+  assert.equal(page.nodes.paidIntake.hidden,false);
+  assert.equal(page.nodes.materialsFrame.src,'/submit/?ref='+reference+'&embedded=1');
+  assert.equal(page.nodes.openIntake.href,'/submit/?ref='+reference);
+  assert.equal(page.nodes.uploadMaterials.href,page.nodes.openIntake.href);
+  assert.equal(page.events.filter(e=>e[0]==='meta'&&e[2]==='Purchase').length,1);
+  assert.equal(page.events.filter(e=>e[0]==='tiktok'&&e[1]==='Purchase').length,1);
+  assert.ok(!page.nodes.materialsFrame.src.includes(checkout));
+ }
+ assert.ok(html.indexOf('id="paidIntake"')<html.indexOf('id="details"'),'form appears before the receipt details');
+});
+
+test('pending, invalid, test, refunded and failed verifications never open the paid form',async()=>{
+ for(const options of [
+  {payment:{paid:false,status:'pending',deposit:true}},
+  {payment:{paid:false,status:'expired',deposit:true}},
+  {payment:{...paid,deposit:true,test:true}},
+  {payment:{...paid,deposit:true,refunded:true}},
+  {payment:{...paid,deposit:true,reference:'https://wrong.example'}},
+  {payment:paid},{search:''},{search:'?session_id=bad'},{networkError:true},{serverError:true}
+ ]){
+  const page=await render(options);
+  assert.equal(page.nodes.paidIntake.hidden,true);
+  assert.equal(page.nodes.materialsFrame.src,undefined);
+ }
+});
+
+test('deposit form fits changing content without an inner scrollbar, with a full-page fallback',async()=>{
+ const page=await render({payment:{...paid,deposit:true,reference:'TC-D-example'}});
+ const frame=page.nodes.materialsFrame;
+ frame.contentDocument={body:{getBoundingClientRect:()=>({height:1400})},getElementById:id=>id==='materialsForm'?{}:null};
+ frame.onload();assert.equal(frame.style.height,'1432px');assert.equal(page.nodes.paidIntake.scrolled,true);
+ frame.contentDocument=null;frame.onload();
+ assert.equal(page.nodes.openIntake.href,'/submit/?ref=TC-D-example');
+});
+
+test('refresh verifies a deposit again and reconstructs its form without a duplicate Purchase',async()=>{
+ const payment={...paid,deposit:true,reference:'TC-D-example'};
+ const first=await render({payment});
+ const second=await render({payment,search:'',sessionStore:first.sessionStore,localStore:first.localStore});
+ assert.equal(second.requests.length,1);assert.equal(second.nodes.paidIntake.hidden,false);assert.deepEqual(second.events,[]);
+ const refunded=await render({payment:{...payment,refunded:true},search:'',sessionStore:first.sessionStore});
+ assert.equal(refunded.nodes.paidIntake.hidden,true);assert.equal(refunded.nodes.materialsFrame.src,undefined);
+});
+
+
+function intakeDocument(height=1400){
+ const layout={height};
+ const body={getBoundingClientRect:()=>({height:layout.height})};
+ return {layout,body,getElementById:id=>id==='materialsForm'?{}:null};
+}
+
+test('ResizeObserver follows expanding and shrinking intake content and disconnects on navigation',async()=>{
+ const page=await render({payment:{...paid,deposit:true,reference:'TC-D-example'},resizeObserver:true});
+ const frame=page.nodes.materialsFrame,doc=intakeDocument(1400.25);
+ frame.contentDocument=doc;frame.onload();
+ assert.equal(frame.style.height,'1433px','fractional content height rounds upward');
+ assert.equal(page.resizeObservers.length,1);
+ const observer=page.resizeObservers[0];
+ assert.equal(observer.target,doc.body);
+ doc.layout.height=1850.5;observer.notify();
+ assert.equal(frame.style.height,'1883px','song picker and validation expansion resize the frame');
+ doc.layout.height=450;observer.notify();
+ assert.equal(frame.style.height,'482px','completion or collapsed content shrinks the frame');
+ frame.contentDocument=null;frame.onload();
+ assert.equal(observer.disconnected,true);
+ doc.layout.height=900;observer.notify();
+ assert.equal(frame.style.height,'482px','disconnected old document cannot resize the frame');
+ const next=intakeDocument(800);
+ frame.contentDocument=next;frame.onload();
+ assert.equal(frame.style.height,'832px');
+ assert.equal(page.resizeObservers.length,2);
+ assert.equal(page.resizeObservers[1].target,next.body);
+});
+
+test('blank, error and inaccessible frame loads retain fallback and recover on a valid load',async()=>{
+ const page=await render({payment:{...paid,deposit:true,reference:'TC-D60-example'},resizeObserver:true});
+ const frame=page.nodes.materialsFrame,load=frame.onload;
+ const blank={body:null,getElementById:()=>null};
+ const error={body:{getBoundingClientRect:()=>({height:100})},getElementById:()=>null};
+ for(const doc of [null,blank,error]){
+  frame.contentDocument=doc;frame.onload();
+  assert.equal(frame.onload,load,'an unsuccessful load must not consume the handler');
+  assert.equal(page.resizeObservers.length,0);
+  assert.equal(page.nodes.paidIntake.scrolled,undefined);
+  assert.equal(page.nodes.openIntake.href,'/submit/?ref=TC-D60-example');
+ }
+ Object.defineProperty(frame,'contentDocument',{configurable:true,get(){throw new Error('Access denied');}});
+ assert.doesNotThrow(()=>frame.onload());
+ assert.equal(page.nodes.openIntake.href,'/submit/?ref=TC-D60-example');
+ Object.defineProperty(frame,'contentDocument',{configurable:true,writable:true,value:intakeDocument(900)});
+ frame.onload();
+ assert.equal(frame.style.height,'932px');
+ assert.equal(page.nodes.paidIntake.scrolled,true);
+ assert.equal(page.resizeObservers.length,1);
+});
+
+test('failed or pending payment retries await verification before showing the intake',async()=>{
+ for(const first of ['network','pending']){
+  let finishRetry;
+  const payment={...paid,deposit:true,reference:'TC-D30-example'};
+  const page=await render({resizeObserver:true,fetchResponse:async attempt=>{
+   if(attempt===1){
+    if(first==='network')throw new Error('Network unavailable');
+    return {ok:true,json:async()=>({paid:false,status:'pending'})};
+   }
+   return new Promise(resolve=>{finishRetry=()=>resolve({ok:true,json:async()=>payment});});
+  }});
+  assert.equal(page.nodes.retry.hidden,false);
+  assert.equal(page.nodes.paidIntake.hidden,true);
+  assert.equal(page.nodes.materialsFrame.src,undefined);
+  const retry=page.nodes.retry.click();
+  assert.equal(page.nodes.retry.hidden,true);
+  assert.equal(page.nodes.paidIntake.hidden,true,'form stays hidden while verification is in flight');
+  assert.equal(page.nodes.materialsFrame.src,undefined);
+  finishRetry();await retry;
+  assert.equal(page.requests.length,2);
+  assert.equal(page.nodes.paidIntake.hidden,false);
+  assert.equal(page.nodes.materialsFrame.src,'/submit/?ref=TC-D30-example&embedded=1');
+  page.nodes.materialsFrame.contentDocument=null;page.nodes.materialsFrame.onload();
+  page.nodes.materialsFrame.contentDocument=intakeDocument(1000);page.nodes.materialsFrame.onload();
+  assert.equal(page.nodes.materialsFrame.style.height,'1032px');
+  assert.equal(page.resizeObservers.length,1);
+ }
+});
+
+test('reverification disconnects the prior observer and replaces the frame handler without duplicate purchases',async()=>{
+ const options={payment:{...paid,deposit:true,reference:'TC-D-example'},resizeObserver:true};
+ const page=await render(options),frame=page.nodes.materialsFrame;
+ frame.contentDocument=intakeDocument();frame.onload();
+ const observer=page.resizeObservers[0],oldLoad=frame.onload;
+ const retry=page.nodes.retry.click();
+ assert.equal(observer.disconnected,true);
+ assert.equal(page.nodes.paidIntake.hidden,true);
+ assert.equal(frame.src,undefined);
+ await retry;
+ assert.notEqual(frame.onload,oldLoad);
+ frame.contentDocument=intakeDocument(1200);frame.onload();
+ assert.equal(frame.style.height,'1232px');
+ assert.equal(page.resizeObservers.length,2);
+ assert.equal(page.events.filter(e=>e[0]==='meta'&&e[2]==='Purchase').length,1);
+ assert.equal(page.events.filter(e=>e[0]==='tiktok'&&e[1]==='Purchase').length,1);
+ options.payment={...options.payment,refunded:true};
+ await page.nodes.retry.click();
+ assert.equal(page.resizeObservers[1].disconnected,true);
+ assert.equal(page.nodes.paidIntake.hidden,true);
+ assert.equal(frame.src,undefined);
+});
+
+
+test('matched materials-first deposits confirm the saved order without asking for duplicate materials',async()=>{
+ const page=await render({payment:{...paid,deposit:true,reference:'TC-D30-order',orderReady:true,needsOrderMatch:true}});
+ assert.equal(page.nodes.paidIntake.hidden,true);assert.equal(page.nodes.materialsFrame.src,undefined);assert.match(page.nodes.title.textContent,/deposit and materials/);assert.match(page.nodes.next.textContent,/24–72 hours/);assert.match(page.nodes.uploadMaterials.textContent,/optional/);
+});
+
+test('paid material matching outages offer retry and never claim the order is ready or request duplicate uploads',async()=>{
+ const page=await render({payment:{...paid,deposit:true,reference:'TC-D30-order',orderReady:false,needsOrderMatch:true,depositOrderStatus:'unavailable'}});
+ assert.equal(page.nodes.paidIntake.hidden,true);assert.equal(page.nodes.retry.hidden,false);assert.match(page.nodes.message.textContent,/still matching/);assert.match(page.nodes.message.textContent,/Do not pay again/);
 });

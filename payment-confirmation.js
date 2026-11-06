@@ -15,10 +15,33 @@ if(incomingSession!==null){
   if(!recovery||!validSession(recovery.session)||!Number.isFinite(recovery.expiresAt)||recovery.expiresAt<=Date.now()||recovery.expiresAt>Date.now()+recoveryLifetime)recovery=null;
 }
 const session=recovery?.session;
+let intakeResizeObserver;
 try{if(recovery)sessionStorage.setItem(recoveryKey,JSON.stringify(recovery));else sessionStorage.removeItem(recoveryKey);}catch{}
 // Strip the reference before loading analytics. History state also permits a
 // refresh when the browser has disabled sessionStorage.
 history.replaceState(recovery?{toonclipzPayment:recovery}:null,'',location.pathname);
+function showDepositIntake(payment){
+  if(!payment.deposit||payment.test||payment.refunded||!payment.paid||payment.orderReady||payment.needsOrderMatch||!/^TC-D(?:30|60|180)?-[A-Za-z0-9-]+$/.test(payment.reference||''))return;
+  const target='/submit/?ref='+encodeURIComponent(payment.reference);
+  const frame=$('materialsFrame');
+  if(!frame||!$('paidIntake')||!$('openIntake'))return;
+  $('openIntake').href=target;
+  $('paidIntake').hidden=false;
+  frame.onload=()=>{
+    intakeResizeObserver?.disconnect();
+    try{
+      const body=frame.contentDocument?.body;
+      if(!body||!frame.contentDocument.getElementById('materialsForm'))return;
+      // The frame is same-origin. Fit its real content, including the song
+      // picker and validation messages, so phones use one page scrollbar.
+      const resize=()=>{frame.style.height=Math.ceil(body.getBoundingClientRect().height+32)+'px';};
+      resize();
+      if(window.ResizeObserver){intakeResizeObserver=new window.ResizeObserver(resize);intakeResizeObserver.observe(body);}
+      $('paidIntake').scrollIntoView({block:'start'});
+    }catch{/* The always-visible full-page link is the fallback. */}
+  };
+  frame.src=target+'&embedded=1';
+}
 function packageSummary(duration, fullPackage){
   if(fullPackage)return `Your ${duration}-second custom music video is paid in full. Includes one artist, one outfit, one stage, a vertical MP4 and one minor correction. Upload your materials below so we can begin.`;
   if(duration===180)return 'Your full GTA-inspired AI music video: up to 3 minutes, one artist, up to six scene concepts, one minor revision round, and one 15-second teaser cut from the finished video.';
@@ -57,7 +80,9 @@ function purchase(p){
 }
 async function check(){
   $('retry').hidden=true;
-  for(const id of ['details','status','receipt','uploadMaterials'])$(id).hidden=true;
+  for(const id of ['details','status','receipt','uploadMaterials','paidIntake']){if($(id))$(id).hidden=true;}
+  intakeResizeObserver?.disconnect();
+  if($('materialsFrame')){$('materialsFrame').onload=null;$('materialsFrame').removeAttribute('src');}
   if(!session){$('title').textContent='Your payment confirmation';$('message').textContent='After checkout, Stripe will bring you here with your payment details. If you already paid, keep your Stripe receipt—do not pay again.';return;}
   $('title').textContent='Checking your payment…';
   try{
@@ -76,8 +101,21 @@ async function check(){
     $('uploadMaterials').href='/submit/?ref='+encodeURIComponent(p.reference);
     $('uploadMaterials').hidden=!!(p.test||p.refunded);
     if(p.test||p.refunded)$('next').textContent=p.test?'Sandbox verification is complete. Test payments are excluded from live advertising Purchase tracking.':'Contact ToonClipz if you have questions about this refunded payment.';
-    purchase(p);
+    if(p.deposit&&!p.test&&!p.refunded&&p.orderReady){
+      $('title').textContent='Your deposit and materials are confirmed!';
+      $('message').textContent='Your $5 payment is matched to your saved materials. Keep your order reference.';
+      $('next').textContent='Your 15-second preview is due in 24–72 hours after your $5 deposit and complete materials. No need to upload the same materials again. You can add anything else using the button below.';
+      $('uploadMaterials').textContent='Add more materials (optional) ↗';
+    }else if(p.deposit&&!p.test&&!p.refunded&&p.needsOrderMatch){
+      $('message').textContent='Your payment is confirmed. We are still matching it to your saved materials. Do not pay again.';
+      $('next').textContent='Tap Check payment again to finish matching your order. If this continues, contact ToonClipz with the reference below.';
+      $('retry').hidden=false;
+    }
+    // Analytics must never prevent a verified buyer from reaching the form.
+    try{purchase(p);}catch(_){console.warn('[ToonClipz tracking] Tracking unavailable; payment remains confirmed.');}
+    showDepositIntake(p);
   }catch(e){$('title').textContent='We couldn’t check your payment';$('message').textContent=e.message;$('retry').hidden=false;}
 }
 $('retry').addEventListener('click',check);check();
 })();
+

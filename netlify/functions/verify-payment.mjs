@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
+import {markDepositPaid} from './_shared/deposit-orders.mjs';
 const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
-export default async function handler(request){
+export function createHandler({confirmDeposit=markDepositPaid}={}){return async function handler(request){
   if(request.method!=='POST') return reply(405,{error:'Method not allowed'});
   const origin=request.headers.get('origin');
   if(origin && origin!==new URL(request.url).origin) return reply(403,{error:'Invalid origin'});
@@ -36,9 +37,15 @@ export default async function handler(request){
     try{const u=new URL(charge?.receipt_url); if(u.protocol==='https:'&&(u.hostname==='stripe.com'||u.hostname.endsWith('.stripe.com')))receipt=u.href;}catch{}
     const email=s.customer_details?.email||s.customer_email||'';
     const maskedEmail=email.includes('@')?email.slice(0,1)+'•••@'+email.split('@')[1]:null;
+    const needsOrderMatch=!!deposit&&/^TC-D(?:30|60|180)-[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(s.client_reference_id||'');
+    let depositOrderStatus='not_applicable';
+    if(needsOrderMatch){try{depositOrderStatus=(await confirmDeposit(s)).status;}catch{depositOrderStatus='unavailable';}}
     return reply(200,{paid:true,test,amount:s.amount_total,currency:s.currency,tax:s.total_details?.amount_tax||0,
+      orderReady:depositOrderStatus==='matched_paid',needsOrderMatch,depositOrderStatus,
       fullPackage:["https://buy.stripe.com/3cI5kE7INepxdMj1MT2wU0m", "https://buy.stripe.com/6oU7sM4wB0yHgYv1MT2wU0n", "https://buy.stripe.com/4gM9AUaUZdltcIf3V12wU0o"].includes(s.payment_link?.url),deposit:!!deposit,duration:gtaOffer?.duration||null,reference:s.client_reference_id||(deposit?'TC-D-':'TC-')+(gtaOffer?.duration?gtaOffer.duration+'-':'')+id.slice(-10),hasOrderReference:!!s.client_reference_id,
       email:maskedEmail,method:card?card.brand+' •••• '+card.last4:charge?.payment_method_details?.type||'Stripe',receipt,
       refunded:!!charge?.refunded,eventId:'tc_'+createHash('sha256').update(id).digest('hex').slice(0,32)});
   }catch{return reply(502,{error:'Unable to check payment right now. Please try again; do not pay again.'});}
-}
+};}
+export default createHandler();
+

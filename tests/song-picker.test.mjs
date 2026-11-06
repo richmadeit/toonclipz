@@ -14,7 +14,7 @@ function setup(){
       pause(){this.paused=true;},async play(){this.paused=false;}
     });return els.get(id);
   };
-  el('songStartTime').value='0:00';
+  el('songStartTime').value='0:00';el('songSection').hidden=true;el('songStart').disabled=true;el('playSongSelection').disabled=true;
   const window={};
   vm.runInContext(source,vm.createContext({document:{getElementById:el},window,
     URL:{createObjectURL:file=>'blob:'+file.name,revokeObjectURL:url=>revoked.push(url)},
@@ -68,4 +68,20 @@ test('replacing or removing a file clears stale confirmation and releases the ol
   h.el('song').files=[];await h.el('song').emit('change');
   assert.equal(h.el('songSection').hidden,true);assert.equal(h.picker.validate(),'');
   assert.equal(h.picker.getSelection(),null);assert.equal(h.el('confirmSongSection').required,false);
+});
+
+
+
+test('song links use confirmed manual timestamps without fetching remote media',async()=>{
+ const h=setup();h.el('songUrl').value='https://youtu.be/song';await h.el('songUrl').emit('input');
+ assert.equal(h.el('songSection').hidden,false);assert.equal(h.el('songStart').disabled,true);assert.equal(h.el('playSongSelection').disabled,true);
+ h.el('songStartTime').value='1:23';await h.el('songStartTime').emit('input');h.el('confirmSongSection').checked=true;
+ assert.equal(JSON.stringify(h.picker.getSelection()),JSON.stringify({start:'1:23',end:'1:38'}));
+ h.el('songUrl').value='https://youtu.be/other';await h.el('songUrl').emit('input');assert.equal(h.picker.getSelection(),null);
+ h.el('songUrl').value='';await h.el('songUrl').emit('input');assert.equal(h.el('songSection').hidden,true);assert.equal(h.picker.validate(),'');
+});
+
+test('removing a recording retains link mode and clears the old confirmed section',async()=>{
+ const h=setup();h.el('songUrl').value='https://youtu.be/song';await h.file('phone.mov');await h.slide(43);h.el('confirmSongSection').checked=true;
+ h.el('song').files=[];await h.el('song').emit('change');assert.equal(h.el('songSection').hidden,false);assert.equal(h.el('confirmSongSection').checked,false);assert.equal(h.el('songStartTime').value,'0:00');
 });

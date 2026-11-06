@@ -19,7 +19,11 @@ Retain the literal placeholder. Repeat separately for live after live keys/allow
 ## Tracking and limitations
 - Purchase is queued to pixel 1066699776252161 only after a verified, paid live checkout. Sandbox and fully refunded payments do not send Purchase.
 - Stable event ID and browser localStorage prevent normal same-browser reload duplicates. This is browser tracking, not a webhook/CAPI integration. Ad blockers, closed tabs, storage clearing and other browsers can affect delivery/deduplication. Confirm actual receipt in Meta Events Manager; queued does not mean received.
-- URL session reference is removed before loading Meta to avoid sending it through the page URL. Reloading the stripped URL shows a neutral screen; keep Stripe's receipt.
+- URL session reference is removed before analytics; tab-local recovery retains only the reference and always re-verifies Stripe on reload. Keep Stripe's receipt.
 - No admin/submission payment status is changed here; reconcile payments in Stripe. Do not fulfill based solely on a frontend event.
-- Required materials remain collected before checkout. A direct payment without client_reference_id displays instructions to match the materials manually.
-- Test with `node --test tests/payment-verification.test.mjs`.
+- New $5 package orders start at `/submit/?tier=30&checkout=deposit` (also 60 and 180). Uploaded objects are checked before the server saves materials and issues the existing Stripe deposit link with the same unique `client_reference_id`. A failed or uncertain save never opens checkout.
+- The return page verifies Stripe and matches the private order receipt. Already-saved materials are not requested again. Older deposit links without a prepared-order reference automatically show the paid intake, with a full-page fallback.
+- `/status.html` uses its existing owner login to show freshly verified paid deposits matched to submitted materials. It refreshes every 30 seconds while visible, and needs the owner to review actual media/links. It does not send push notifications or customer messages.
+- Test, unpaid, refunded, disputed, wrong-link and mismatched-amount checkouts cannot mark an order ready. No credentials, table policies or bucket permissions were added.
+- Regression coverage: `node --test tests/*.test.mjs`. Mock tests do not represent a real purchase. `GET /.netlify/functions/deposit-order` is a read-only private-store availability probe, not proof of a database insert or purchase.
+

@@ -2,6 +2,8 @@
   const $=id=>document.getElementById(id);
   const fileInput=$('song'),section=$('songSection');
   if(!fileInput||!section)return;
+  const linkInput=$('songUrl');
+  const hasSource=()=>!!(fileInput.files[0]||linkInput?.value.trim());
   const audio=$('songPreview'),slider=$('songStart'),startInput=$('songStartTime');
   const selection=$('songSelection'),confirm=$('confirmSongSection');
   const play=$('playSongSelection'),status=$('songPickerStatus');
@@ -51,11 +53,22 @@
   }
   fileInput.addEventListener('change',()=>{
     reset();
-    const file=fileInput.files[0];section.hidden=!file;
-    if(!file)return;
+    const file=fileInput.files[0];section.hidden=!hasSource();
+    if(!file){
+      confirm.required=hasSource();
+      if(hasSource()){status.textContent='For a song link, type the exact start time below and confirm it. Links are reviewed after submission.';render();}
+      return;
+    }
     confirm.required=true;
     status.textContent='Loading your song… You can also enter an exact start time below.';
     objectUrl=URL.createObjectURL(file);audio.src=objectUrl;audio.load();
+  });
+  linkInput?.addEventListener('input',()=>{
+    if(fileInput.files[0])return;
+    if(section.hidden)reset();
+    section.hidden=!hasSource();confirm.required=hasSource();confirm.checked=false;
+    status.textContent='For a song link, type the exact start time below and confirm it. Links are reviewed after submission.';
+    render();
   });
   audio.addEventListener('loadedmetadata',()=>{
     if(!objectUrl)return;
@@ -102,15 +115,16 @@
   audio.addEventListener('ended',stop);
   window.toonclipzSongPicker={
     validate(){
-      if(!fileInput.files[0])return '';
+      if(!hasSource())return '';
       if(!range()){startInput.focus();return startInput.validationMessage||'Enter the exact start time for your preview.';}
-      if(!confirm.checked){confirm.focus();return 'Listen to your chosen section, then check “Yes, use this exact section” before sending.';}
+      if(!confirm.checked){confirm.focus();return 'Choose your start time, then check “Yes, use this exact section” before sending.';}
       return '';
     },
     getSelection(){
       const selected=range();
-      return fileInput.files[0]&&confirm.checked&&selected?{start:format(selected.start),end:format(selected.end)}:null;
+      return hasSource()&&confirm.checked&&selected?{start:format(selected.start),end:format(selected.end)}:null;
     },
     destroy:reset
   };
 })();
+

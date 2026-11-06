@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from '../netlify/functions/verify-payment.mjs';
+import handler,{createHandler} from '../netlify/functions/verify-payment.mjs';
 const request=id=>new Request('https://toonclipz.netlify.app/.netlify/functions/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:id})});
 test('verification fails closed and separates paid, pending, wrong-store and sandbox payments',async()=>{
   const oldFetch=globalThis.fetch;
@@ -67,4 +67,19 @@ test('full-price packages verify exact amounts and preserve purchase values',asy
  let p=await(await handler(request('cs_live_abcdefghijklmnop'))).json();assert.equal(p.paid,true);assert.equal(p.fullPackage,true);assert.equal(p.amount,offer.amount);assert.equal(p.duration,offer.duration);assert.equal(p.deposit,false);
  s.amount_subtotal=500;assert.equal((await handler(request('cs_live_abcdefghijklmnop'))).status,404);
  }}finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
+});
+
+
+
+test('materials-first payment association uses only the server-fetched Stripe session and surfaces matching failures',async()=>{
+ const oldFetch=globalThis.fetch,oldKey=process.env.STRIPE_SECRET_KEY;process.env.STRIPE_SECRET_KEY='test-only-placeholder';
+ const s={id:'cs_live_abcdefghijklmnop',livemode:true,mode:'payment',status:'complete',payment_status:'paid',currency:'usd',amount_subtotal:500,amount_total:500,client_reference_id:'TC-D30-12345678-1234-4234-8234-123456789abc',payment_link:{url:'https://buy.stripe.com/eVqdRabZ33KTdMjfDJ2wU0b'}};
+ globalThis.fetch=async()=>Response.json(s);let observed;
+ try{
+  const verify=createHandler({confirmDeposit:async session=>{observed=session;return {status:'matched_paid'};}});
+  const p=await(await verify(request(s.id))).json();assert.equal(p.orderReady,true);assert.equal(p.needsOrderMatch,true);assert.equal(observed.client_reference_id,s.client_reference_id);
+  const unavailable=createHandler({confirmDeposit:async()=>{throw new Error('private detail');}});
+  const pending=await(await unavailable(request(s.id))).json();assert.equal(pending.paid,true);assert.equal(pending.orderReady,false);assert.equal(pending.depositOrderStatus,'unavailable');assert.ok(!JSON.stringify(pending).includes('private detail'));
+  s.client_reference_id=null;observed=null;const legacy=await(await verify(request(s.id))).json();assert.equal(legacy.needsOrderMatch,false);assert.equal(legacy.orderReady,false);assert.equal(observed,null);
+ }finally{globalThis.fetch=oldFetch;if(oldKey===undefined)delete process.env.STRIPE_SECRET_KEY;else process.env.STRIPE_SECRET_KEY=oldKey;}
 });
