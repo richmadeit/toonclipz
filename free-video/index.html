@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#130b22">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta name="description" content="Submit your music for consideration for a free 15-second ToonClipz video. One song selected each hour during the live. No payment required.">
+  <title>Submit your music for a free video | ToonClipz</title>
+  <link rel="stylesheet" href="/free-video/free-video.css">
+  <script src="/free-video/free-video.js" defer></script>
+</head>
+<body>
+  <header class="top"><a class="brand" href="/">Toon<span>Clipz</span></a><a class="back" href="/">← All three options</a></header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">Your music. In the ToonClipz world.</p>
+      <h1 id="page-title">Your song.<br>A free <span>15-second video.</span></h1>
+      <p class="lead">I pick one song each hour during the live and turn it into a ToonClipz video.</p>
+      <div class="tags" aria-label="Offer details"><span>No payment</span><span>15-second clip</span><span>Selected on live</span></div>
+      <p class="fine">Submit for consideration. Not every song is selected, and submitting does not guarantee a video or a delivery time. This is separate from the paid video service.</p>
+      <ol class="steps"><li><strong>Send your song</strong><span>Share a link and the 15-second moment you want.</span></li><li><strong>Watch for the pick</strong><span>One selection each hour while the live is running.</span></li><li><strong>If selected, we connect</strong><span>Your email is for this submission, not a marketing signup.</span></li></ol>
+    </section>
+    <section class="form-card" aria-labelledby="form-title">
+      <p class="eyebrow">Free submission</p><h2 id="form-title">Put your song in the mix.</h2>
+      <div id="availability" class="notice" role="status">Checking whether submissions are open…</div>
+      <noscript><p class="notice">JavaScript is needed to submit securely. Enable it and reload. Nothing has been sent.</p></noscript>
+      <form id="submission-form" method="post" action="/.netlify/functions/free-video-submit" autocomplete="on">
+        <fieldset id="form-fields" disabled>
+          <legend class="sr-only">Your music submission</legend>
+          <label for="artistName">Artist name</label>
+          <input id="artistName" name="artistName" maxlength="80" autocomplete="nickname" required placeholder="Your artist name">
+          <label for="email">Contact email</label>
+          <input id="email" name="email" type="email" maxlength="254" autocomplete="email" required placeholder="you@example.com">
+          <p class="help">So ToonClipz can contact you about your submission.</p>
+          <label for="songUrl">Song link</label>
+          <input id="songUrl" name="songUrl" type="url" maxlength="2048" autocomplete="off" required placeholder="https://soundcloud.com/your-song" aria-describedby="song-help">
+          <p id="song-help" class="help">Use YouTube, SoundCloud, Spotify, Apple Music, Audiomack, Google Drive or Dropbox. Share only the song, not a private folder. Make sure ToonClipz can open it. No file uploads.</p>
+          <label for="startTime">Where should the 15 seconds start?</label>
+          <div class="time-row"><input id="startTime" name="startTime" type="text" inputmode="text" pattern="[0-9]{1,3}:[0-5][0-9]" maxlength="6" required value="0:00" aria-describedby="time-help"><span id="segment" aria-live="polite">0:00 → 0:15</span></div>
+          <p id="time-help" class="help">Minutes:seconds. Example: 0:45 selects 0:45–1:00.</p>
+          <label class="consent"><input id="rightsConsent" name="rightsConsent" type="checkbox" required><span>I own this music or have permission from the rights holders. If selected, ToonClipz may use this 15-second segment to make and show the free video during the live.</span></label>
+          <div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+          <p class="privacy">Your artist name, email, song link, timestamp and permission are shared with ToonClipz to review your submission. They are not posted in a public queue. Submit only content you have permission to share.</p>
+          <button id="submit-button" type="submit">Submit my music for free <span aria-hidden="true">↗</span></button>
+        </fieldset>
+        <p id="form-result" class="notice" role="status" tabindex="-1" hidden></p>
+      </form>
+      <p class="bottom-note">No checkout. No card details. No purchase needed.</p>
+    </section>
+  </main>
+  <footer><a href="/">Back to ToonClipz</a><span>Music links are reviewed by a person.</span></footer>
+</body>
+</html>
