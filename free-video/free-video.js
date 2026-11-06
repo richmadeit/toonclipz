@@ -6,7 +6,17 @@
   const result = document.querySelector('#form-result');
   const button = document.querySelector('#submit-button');
   const endpoint = '/.netlify/functions/free-video-submit';
-  let ready = false, busy = false, completed = false, requestId = null, fingerprint = null;
+  let ready = false, busy = false, completed = false, requestId = null, fingerprint = null, audioRevision = 0;
+  const audioInput=form.elements.audio;
+  const removeAudio=document.querySelector('#remove-audio');
+  const updateAudio=()=>{
+    audioRevision++;
+    const file=audioInput.files[0];
+    document.querySelector('#audio-picked').textContent=file ? `${file.name} · ${(file.size/1024/1024).toFixed(1)} MB selected` : 'Upload audio or add a link. You only need one.';
+    removeAudio.hidden=!file;
+  };
+  audioInput.addEventListener('change',updateAudio);
+  removeAudio.addEventListener('click',()=>{audioInput.value='';updateAudio();});
   const format = seconds => Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
   const updateSegment = () => {
     const raw = form.elements.startTime.value;
@@ -21,6 +31,8 @@
     songUrl: 'Use a full https:// song link from one of the listed services. Remove any # fragment or password from the link.',
     startTime: 'Enter a start time in minutes:seconds, such as 0:45.',
     rightsConsent: 'Confirm you have permission to share this music.',
+    audioSize: 'Choose an audio file up to 4 MB, or paste a song link instead.',
+    audioType: 'That file is not a supported audio file. Choose MP3, WAV, M4A, AAC, OGG or FLAC.',
     invalid_request: 'Check the form and try again.'
   };
   const showResult = (text, success = false) => {
@@ -41,18 +53,29 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (!ready || busy || completed || !form.reportValidity()) return;
+    const audioFile=audioInput.files[0];
+    if(!audioFile && !form.elements.songUrl.value.trim()) {showResult('Upload audio or paste a song link. You only need one.');return;}
+    if(audioFile && (audioFile.size<16 || audioFile.size>4*1024*1024)) {showResult(messages.audioSize);return;}
+    if(audioFile && !/\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(audioFile.name)) {showResult(messages.audioType);return;}
     const payload = {
       artistName: form.elements.artistName.value.trim(), email: form.elements.email.value.trim(),
       songUrl: form.elements.songUrl.value.trim(), startTime: form.elements.startTime.value.trim(),
       rightsConsent: form.elements.rightsConsent.checked, website: form.elements.website.value
     };
-    const current = JSON.stringify(payload);
+    const current = JSON.stringify({...payload,audio:audioFile ? [audioFile.name,audioFile.size,audioFile.lastModified,audioRevision] : null});
     if (fingerprint !== current) { requestId = crypto.randomUUID(); fingerprint = current; }
-    busy = true; fields.disabled = true; button.textContent = 'Sending…'; result.hidden = true;
+    busy = true; fields.disabled = true; button.textContent = audioFile ? 'Uploading audio…' : 'Sending…'; result.hidden = true;
     try {
+      let body=JSON.stringify({...payload,requestId});
+      let headers={'Content-Type':'application/json'};
+      if(audioFile){
+        body=new FormData();
+        for(const [key,value] of Object.entries({...payload,requestId})) body.append(key,String(value));
+        body.append('audio',audioFile);
+        headers={}; // Browser sets the required multipart boundary.
+      }
       const response = await fetch(endpoint, {
-        method: 'POST', credentials: 'omit', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({...payload, requestId}), signal: AbortSignal.timeout(12000)
+        method: 'POST', credentials: 'omit', headers, body, signal: AbortSignal.timeout(45000)
       });
       let data = {};
       try { data = await response.json(); } catch { /* Platform rate limiting can return HTML. */ }
@@ -65,6 +88,8 @@
         showResult('Please wait before submitting again. Only one submission per email per hour is accepted, and shared networks have a short submission limit.');
       } else if (response.status === 400) {
         showResult(messages[data.field] || messages.invalid_request);
+      } else if (response.status === 413) {
+        showResult(messages.audioSize);
       } else if (response.status === 409) {
         showResult('This request was already used for different details. Reload to start a new submission.');
       } else {

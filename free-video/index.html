@@ -21,13 +21,13 @@
       <p class="lead">I pick one song each hour during the live and turn it into a ToonClipz video.</p>
       <div class="tags" aria-label="Offer details"><span>No payment</span><span>15-second clip</span><span>Selected on live</span></div>
       <p class="fine">Submit for consideration. Not every song is selected, and submitting does not guarantee a video or a delivery time. This is separate from the paid video service.</p>
-      <ol class="steps"><li><strong>Send your song</strong><span>Share a link and the 15-second moment you want.</span></li><li><strong>Watch for the pick</strong><span>One selection each hour while the live is running.</span></li><li><strong>If selected, we connect</strong><span>Your email is for this submission, not a marketing signup.</span></li></ol>
+      <ol class="steps"><li><strong>Send your song</strong><span>Upload audio from your phone, or paste a song link.</span></li><li><strong>Watch for the pick</strong><span>One selection each hour while the live is running.</span></li><li><strong>If selected, we connect</strong><span>Your email is for this submission, not a marketing signup.</span></li></ol>
     </section>
     <section class="form-card" aria-labelledby="form-title">
       <p class="eyebrow">Free submission</p><h2 id="form-title">Put your song in the mix.</h2>
       <div id="availability" class="notice" role="status">Checking whether submissions are open…</div>
       <noscript><p class="notice">JavaScript is needed to submit securely. Enable it and reload. Nothing has been sent.</p></noscript>
-      <form id="submission-form" method="post" action="/.netlify/functions/free-video-submit" autocomplete="on">
+      <form id="submission-form" method="post" enctype="multipart/form-data" action="/.netlify/functions/free-video-submit" autocomplete="on">
         <fieldset id="form-fields" disabled>
           <legend class="sr-only">Your music submission</legend>
           <label for="artistName">Artist name</label>
@@ -35,15 +35,20 @@
           <label for="email">Contact email</label>
           <input id="email" name="email" type="email" maxlength="254" autocomplete="email" required placeholder="you@example.com">
           <p class="help">So ToonClipz can contact you about your submission.</p>
-          <label for="songUrl">Song link</label>
-          <input id="songUrl" name="songUrl" type="url" maxlength="2048" autocomplete="off" required placeholder="https://soundcloud.com/your-song" aria-describedby="song-help">
-          <p id="song-help" class="help">Use YouTube, SoundCloud, Spotify, Apple Music, Audiomack, Google Drive or Dropbox. Share only the song, not a private folder. Make sure ToonClipz can open it. No file uploads.</p>
+          <label for="audio">Audio uploads</label>
+          <input id="audio" name="audio" type="file" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac,audio/mpeg,audio/wav,audio/mp4,audio/aac,audio/ogg,audio/flac" aria-describedby="audio-help audio-picked">
+          <p id="audio-help" class="help">Choose an audio file from your phone. MP3, WAV, M4A, AAC, OGG or FLAC, up to 4 MB. A short clip is fine. If your file is larger, paste a song link below instead.</p>
+          <p id="audio-picked" class="help" aria-live="polite">Upload audio or add a link. You only need one.</p>
+          <button id="remove-audio" class="remove-audio" type="button" hidden>Remove audio file</button>
+          <label for="songUrl">Or paste a song link</label>
+          <input id="songUrl" name="songUrl" type="url" maxlength="2048" autocomplete="off" placeholder="https://soundcloud.com/your-song" aria-describedby="song-help">
+          <p id="song-help" class="help">YouTube, SoundCloud, Spotify, Apple Music, Audiomack, Google Drive or Dropbox. Share only the song, not a private folder. Make sure ToonClipz can open it.</p>
           <label for="startTime">Where should the 15 seconds start?</label>
           <div class="time-row"><input id="startTime" name="startTime" type="text" inputmode="text" pattern="[0-9]{1,3}:[0-5][0-9]" maxlength="6" required value="0:00" aria-describedby="time-help"><span id="segment" aria-live="polite">0:00 → 0:15</span></div>
-          <p id="time-help" class="help">Minutes:seconds. Example: 0:45 selects 0:45–1:00.</p>
+          <p id="time-help" class="help">Minutes:seconds. Example: 0:45 selects 0:45–1:00. For an already-trimmed audio clip, leave 0:00.</p>
           <label class="consent"><input id="rightsConsent" name="rightsConsent" type="checkbox" required><span>I own this music or have permission from the rights holders. If selected, ToonClipz may use this 15-second segment to make and show the free video during the live.</span></label>
           <div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-          <p class="privacy">Your artist name, email, song link, timestamp and permission are shared with ToonClipz to review your submission. They are not posted in a public queue. Submit only content you have permission to share.</p>
+          <p class="privacy">Your artist name, email, audio file or song link, timestamp and permission are shared with ToonClipz to review your submission. They are stored privately, not posted in a public queue. Submit only content you have permission to share.</p>
           <button id="submit-button" type="submit">Submit my music for free <span aria-hidden="true">↗</span></button>
         </fieldset>
         <p id="form-result" class="notice" role="status" tabindex="-1" hidden></p>
@@ -51,6 +56,6 @@
       <p class="bottom-note">No checkout. No card details. No purchase needed.</p>
     </section>
   </main>
-  <footer><a href="/">Back to ToonClipz</a><span>Music links are reviewed by a person.</span></footer>
+  <footer><a href="/">Back to ToonClipz</a><span>Music submissions are reviewed by a person.</span></footer>
 </body>
 </html>
