@@ -1,10 +1,18 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>RichMadeIt + ToonClipz · Live activity</title><link rel="stylesheet" href="status.css?v=depositorders1"><script src="status.js?v=depositorders1" defer></script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>RichMadeIt + ToonClipz · Live activity</title><link rel="stylesheet" href="status.css?v=depositorders1"><script src="status.js?v=depositorders1" defer></script><script src="dashboard-live.js?v=live1" defer></script></head>
 <body>
 <header><a class="brand" href="/">TOON<span>CLIPZ</span><small>OWNER DASHBOARD</small></a><div class="head-actions"><span id="connection" role="status">Private access</span><button id="logout" hidden>Sign out</button></div></header>
 <main>
 <section id="login" class="gate panel"><span class="eyebrow">YOUR BUSINESS, AT A GLANCE</span><h1>See what’s happening.</h1><p>Paid deposits, customer activity and verified purchases for ToonClipz and RichMadeIt in one place.</p><form id="loginForm"><label for="password">Dashboard password</label><input id="password" type="password" autocomplete="current-password" required minlength="16"><button class="primary" id="signIn">Open dashboard →</button></form><p id="loginMessage" role="alert"></p><small>Your dashboard password is checked securely on the server.</small></section>
 <section id="dashboard" hidden>
+<section class="panel live-panel" aria-labelledby="liveHeading">
+<div class="section-title"><div><span class="eyebrow">ON YOUR WEBSITE</span><h2 id="liveHeading">Live now button</h2></div><span class="pill" id="liveBadge">OFF</span></div>
+<p id="liveState">The live button is hidden until you turn it on.</p>
+<p class="footnote">Start your broadcast first, then turn this on. This is a manual switch; it does not detect Instagram or TikTok broadcasts. A safety timer hides it automatically.</p>
+<form id="liveForm"><div class="live-fields"><label>Instagram live or profile link<input id="liveInstagram" type="url" placeholder="https://www.instagram.com/yourname/live/" maxlength="1024" autocomplete="off"></label><label>TikTok live or profile link<input id="liveTiktok" type="url" placeholder="https://www.tiktok.com/@yourname/live" maxlength="1024" autocomplete="off"></label><label>Automatically hide after<select id="liveHours"><option value="1">1 hour</option><option value="2">2 hours</option><option value="4" selected>4 hours</option><option value="6">6 hours</option></select></label></div>
+<p class="footnote">Use one link or both. Use the broadcast share link when available. A profile link may require visitors to tap your live profile photo or sign in. Only enable links for platforms where you are actually live.</p>
+<div class="live-actions"><button class="primary" id="liveStart" type="submit">I’m live · Turn on button</button><button id="liveStop" type="button">I’m done · Turn off</button><button id="liveCheck" type="button">Check status</button></div><p id="liveMessage" role="status" aria-live="polite"></p></form>
+</section>
 <nav class="brand-toggle" aria-label="Choose website"><button type="button" id="showToonclipz" aria-pressed="true">ToonClipz</button><button type="button" id="showRichmadeit" aria-pressed="false">RichMadeIt</button><a id="openSite" href="https://toonclipz.netlify.app/" target="_blank" rel="noopener noreferrer">Open page ↗</a></nav>
 <div class="title-row"><div><span class="eyebrow" id="activityBrand">TOONCLIPZ / ACTIVITY</span><h1>Every visit is a possibility.</h1><p id="updated">Waiting for your first refresh.</p></div><div class="controls"><label class="sr-only" for="range">Time range</label><select id="range"><option value="24h">Last 24 hours</option><option value="7d">Last 7 days</option></select><button id="refresh">Refresh ↻</button></div></div>
 <div id="warning" class="notice" hidden role="status"></div>
@@ -31,4 +39,5 @@
 <footer><label><input type="checkbox" id="exclude"> Exclude my ToonClipz visits on this browser</label><p>Refresh pauses while this tab is hidden. Traffic is an estimate: blockers, privacy preferences and bots can affect counts. Traffic tracking does not collect names, email addresses, typed form content or card details. The private deposit list separately displays the order contact supplied by the buyer. A visit is a browser session, not an identified person.</p></footer>
 </section>
 </main></body></html>
+
 

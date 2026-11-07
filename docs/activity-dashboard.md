@@ -29,3 +29,14 @@ Cleanup runs daily to remove traffic sessions older than 30 days. Stripe data is
 `node --test tests/activity.test.mjs tests/payment-verification.test.mjs` tests access control, expiry, origin checks, event PII stripping and purchase forgery rejection, duplicate handling, independent steps, Stripe payment filters/refunds/pagination/errors. `node scripts/build-site.mjs` builds the explicit public allowlist.
 
 After deployment, configure the dashboard password and sign in. Turn on “Exclude my visits” in your own browser. For an intentional traffic check use a separate browser with tracking allowed, visit `/?utm_source=instagram`, click Get started and interact with the form. Refresh the dashboard after 30 seconds. A public POST of a purchase event must be rejected. No new payment is necessary: existing live $25 Stripe checkouts in the selected window should be shown.
+
+
+## Website Live now button
+
+The homepage and `/videos/` load a small `Live now` button only when the owner enables it in `/status.html`. The private dashboard reuses its existing signed HttpOnly session cookie; no new password or social-network access is added. Start the broadcast first, paste the official Instagram and/or TikTok live link, choose the safety timer, and select **I’m live · Turn on button**. Use **I’m done · Turn off** when the broadcast ends. A profile link is also accepted, but visitors may have to tap the live profile picture or sign in on the platform.
+
+This is a manual status control, not automatic broadcast detection. Do not turn it on for an upcoming or finished stream. The default timer is four hours, with one, two and six hours also available. The timer is a safety cutoff, not a schedule or proof that a broadcast is running. The public button opens platform links in a new tab and never covers the purchase bar. Its pulse respects reduced-motion settings.
+
+Visible customer tabs check `/.netlify/functions/live-status` every 20 seconds, allowing visitors already browsing to see start and stop updates without reloading. Unknown, failed, expired or malformed status hides the button. Hidden tabs pause polling and recheck on return. The status uses a private Netlify Blobs record in `toonclipz-live-v1`; only enabled broadcast URLs and remaining time are public. It stores no viewer data. Requests count toward the existing Netlify plan. The owner writes via `/.netlify/functions/dashboard-live`, with session, origin, method, content type, size and official-domain validation. No public URL parameter or browser-local setting can turn the button on.
+
+Verify with `node --test tests/live-button.test.mjs`, plus the existing homepage and dashboard tests. UI tests use local fixtures; do not enable a fake live broadcast in production to test the feature.
