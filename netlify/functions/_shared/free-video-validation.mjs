@@ -1,4 +1,4 @@
-export const RIGHTS_VERSION = 'free-video-2026-11-06';
+export const RIGHTS_VERSION = 'free-video-photo-2026-11-08';
 export const MAX_BYTES = 8192;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CONTROL = /[\u0000-\u001f\u007f]/;
@@ -21,7 +21,7 @@ export function timestamp(raw) {
   return value <= 35985 ? value : null;
 }
 
-export function validate(body, {hasAudio = false} = {}) {
+export function validate(body, {hasAudio = false, hasPhoto = false} = {}) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return {error: 'invalid_request'};
   const allowed = new Set(['requestId','artistName','email','songUrl','startTime','rightsConsent','website']);
   if (Object.keys(body).some(key => !allowed.has(key))) return {error: 'invalid_request'};
@@ -30,6 +30,7 @@ export function validate(body, {hasAudio = false} = {}) {
   if (artist.length < 1 || artist.length > 80 || CONTROL.test(artist)) return {error: 'artistName'};
   const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
   if (email.length > 254 || !/^[^\s@<>]{1,64}@[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,63}$/.test(email) || email.includes('..') || CONTROL.test(email)) return {error: 'email'};
+  if (!hasPhoto) return {error: 'photoRequired'};
   const url = songUrl(body.songUrl);
   if ((!hasAudio || body.songUrl) && !url) return {error: 'songUrl'};
   const start = timestamp(body.startTime);

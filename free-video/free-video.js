@@ -6,8 +6,40 @@
   const result = document.querySelector('#form-result');
   const button = document.querySelector('#submit-button');
   const endpoint = '/.netlify/functions/free-video-submit';
-  let ready = false, busy = false, completed = false, requestId = null, fingerprint = null, audioRevision = 0;
+  let ready = false, busy = false, completed = false, requestId = null, fingerprint = null, audioRevision = 0, photoRevision = 0, photoReady = null, photoBusy = false;
+  let photoPreviewUrl = null;
   const audioInput=form.elements.audio;
+  const photoInput=form.elements.photo;
+  photoInput.addEventListener('change',async()=>{
+    const revision=++photoRevision;
+    photoReady=null; photoBusy=true;
+    const preview=document.querySelector('#photo-preview');
+    preview.hidden=true;if(photoPreviewUrl){URL.revokeObjectURL(photoPreviewUrl);photoPreviewUrl=null;}
+    const label=document.querySelector('#photo-picked');
+    label.textContent='Preparing photo…';
+    try {
+      const file=photoInput.files[0];
+      if(!file)throw new Error('A photo is required.');
+      if(file.size>20*1024*1024)throw new Error('Choose a photo up to 20 MB.');
+      if(!/\.(jpg|jpeg|png|webp)$/i.test(file.name))throw new Error('Choose JPG, PNG or WebP. A screenshot of your photo works too.');
+      const bitmap=await createImageBitmap(file);
+      let width=bitmap.width*Math.min(1,1600/Math.max(bitmap.width,bitmap.height)),blob=null;
+      const canvas=document.createElement('canvas');
+      for(let attempt=0;attempt<6;attempt++){
+        canvas.width=Math.max(1,Math.round(width));canvas.height=Math.max(1,Math.round(bitmap.height*width/bitmap.width));
+        canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
+        blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.8));
+        if(blob && blob.size<=250000)break;
+        width*=0.7;
+      }
+      bitmap.close();
+      if(!blob || blob.size>250000)throw new Error('This photo could not be prepared. Try a screenshot of it.');
+      if(revision!==photoRevision)return;
+      photoReady=blob;photoPreviewUrl=URL.createObjectURL(blob);preview.src=photoPreviewUrl;preview.hidden=false;
+      label.textContent='Photo ready · '+Math.ceil(blob.size/1024)+' KB. Your original stays on your phone.';
+    }catch(error){if(revision===photoRevision)label.textContent=error.message || 'Could not open that photo. Try a screenshot of it.';}
+    finally{if(revision===photoRevision)photoBusy=false;}
+  });
   const removeAudio=document.querySelector('#remove-audio');
   const updateAudio=()=>{
     audioRevision++;
@@ -30,7 +62,10 @@
     email: 'Enter a valid contact email.',
     songUrl: 'Use a full https:// song link from one of the listed services. Remove any # fragment or password from the link.',
     startTime: 'Enter a start time in minutes:seconds, such as 0:45.',
-    rightsConsent: 'Confirm you have permission to share this music.',
+    rightsConsent: 'Confirm you have permission to share this music and photo.',
+    photoRequired:'Choose a photo of you or the artist.',
+    photoType:'Choose a JPG, PNG or WebP photo, or a screenshot of it.',
+    photoSize:'The photo could not be prepared. Choose it again or try a screenshot.',
     audioSize: 'Choose an audio file up to 4 MB, or paste a song link instead.',
     audioType: 'That file is not a supported audio file. Choose MP3, WAV, M4A, AAC, OGG or FLAC.',
     invalid_request: 'Check the form and try again.'
@@ -53,6 +88,8 @@
   form.addEventListener('submit', async event => {
     event.preventDefault();
     if (!ready || busy || completed || !form.reportValidity()) return;
+    if(photoBusy){showResult('Your photo is still being prepared. Try Submit in a moment.');return;}
+    if(!photoReady){showResult('Choose a photo that shows “Photo ready” before submitting.');return;}
     const audioFile=audioInput.files[0];
     if(!audioFile && !form.elements.songUrl.value.trim()) {showResult('Upload audio or paste a song link. You only need one.');return;}
     if(audioFile && (audioFile.size<16 || audioFile.size>4*1024*1024)) {showResult(messages.audioSize);return;}
@@ -62,18 +99,15 @@
       songUrl: form.elements.songUrl.value.trim(), startTime: form.elements.startTime.value.trim(),
       rightsConsent: form.elements.rightsConsent.checked, website: form.elements.website.value
     };
-    const current = JSON.stringify({...payload,audio:audioFile ? [audioFile.name,audioFile.size,audioFile.lastModified,audioRevision] : null});
+    const current = JSON.stringify({...payload,photoRevision,audio:audioFile ? [audioFile.name,audioFile.size,audioFile.lastModified,audioRevision] : null});
     if (fingerprint !== current) { requestId = crypto.randomUUID(); fingerprint = current; }
-    busy = true; fields.disabled = true; button.textContent = audioFile ? 'Uploading audio…' : 'Sending…'; result.hidden = true;
+    busy = true; fields.disabled = true; button.textContent = 'Uploading photo + song…'; result.hidden = true;
     try {
-      let body=JSON.stringify({...payload,requestId});
-      let headers={'Content-Type':'application/json'};
-      if(audioFile){
-        body=new FormData();
-        for(const [key,value] of Object.entries({...payload,requestId})) body.append(key,String(value));
-        body.append('audio',audioFile);
-        headers={}; // Browser sets the required multipart boundary.
-      }
+      const body=new FormData();
+      for(const [key,value] of Object.entries({...payload,requestId}))body.append(key,String(value));
+      body.append('photo',photoReady,'reference.jpg');
+      if(audioFile)body.append('audio',audioFile);
+      const headers={}; // Browser sets multipart boundary.
       const response = await fetch(endpoint, {
         method: 'POST', credentials: 'omit', headers, body, signal: AbortSignal.timeout(45000)
       });
@@ -83,7 +117,7 @@
         completed = true;
         availability.textContent = 'Submission received.';
         button.textContent = 'Submitted';
-        showResult('Your song is in for consideration. This is not a selection or a delivery promise. If selected, ToonClipz can contact you at the email you provided. Reference: ' + data.reference, true);
+        showResult('Your photo and song are in for consideration. This is not a selection or a delivery promise. If selected, ToonClipz can contact you at the email you provided. Reference: ' + data.reference, true);
       } else if (response.status === 429) {
         showResult('Please wait before submitting again. Only one submission per email per hour is accepted, and shared networks have a short submission limit.');
       } else if (response.status === 400) {

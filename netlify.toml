@@ -78,3 +78,11 @@
     Cache-Control = "no-store"
     X-Robots-Tag = "noindex, nofollow"
 
+
+[[headers]]
+  for = "/free-video/inbox*"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Robots-Tag = "noindex, nofollow"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
