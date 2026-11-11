@@ -4,12 +4,19 @@ import {readFileSync} from 'node:fs';
 const root=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const videos=readFileSync(new URL('../videos/index.html',import.meta.url),'utf8');
 
-test('homepage serves the same current video-package page without a redirect or hub',()=>{
+test('homepage and videos route offer the same weekly plan with no legacy checkout',()=>{
  assert.equal(root.trim(),videos.trim());
- assert.doesNotMatch(root,/http-equiv=["']refresh|hub\.js|hub\.css|What are we<br><em>making today/i);
- for(const tier of ['30','60','180'])assert.match(root,new RegExp('href="/submit/\\?tier='+tier+'&amp;checkout=deposit"'));
- assert.equal((root.match(/class="button deposit-start"/g)||[]).length,3);
- assert.equal((root.match(/class="button checkout full-payment"/g)||[]).length,3);
+ assert.doesNotMatch(root,/http-equiv=["']refresh|hub\.js|hub\.css/);
+ assert.match(root,/\$150 per week/);
+ assert.match(root,/five custom 30-second AI videos/);
+ assert.match(root,/five working days/);
+ assert.match(root,/Two revision requests total across the week/);
+ assert.match(root,/The \$5 preview is not credited toward the \$150 weekly fee/);
+ assert.match(root,/Your existing order, deposit credit and agreed terms stay unchanged/);
+ assert.doesNotMatch(root,/href="https:\/\/buy\.stripe\.com|checkout=deposit/);
+ assert.match(root,/New-plan checkout is being updated/);
+ assert.match(root,/href="mailto:rich\.madeit3@gmail\.com\?subject=ToonClipz%20Weekly/);
+ assert.match(root,/href="\/submit\/"/);
 });
 
 test('homepage assets and navigation resolve without a videos directory prefix',()=>{

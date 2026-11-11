@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {webcrypto} from 'node:crypto';
 import vm from 'node:vm';
 
-const html=readFileSync(new URL('../videos/index.html',import.meta.url),'utf8');
+const html=readFileSync(new URL('./fixtures/legacy-packages.html',import.meta.url),'utf8');
 const script=readFileSync(new URL('../gta-offers.js',import.meta.url),'utf8');
 const fullOffers={
   '30':{price:50,url:'https://buy.stripe.com/3cI5kE7INepxdMj1MT2wU0m'},

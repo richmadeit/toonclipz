@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('sales, intake and payment copy promise same-day previews with no invented cutoff',()=>{
- for(const file of ['index.html','videos/index.html','submit/index.html','order.js','payment-confirmation.html','payment-confirmation.js']){
+test('legacy intake and payment preserve their existing timing terms',()=>{
+ for(const file of ['submit/index.html','order.js','payment-confirmation.html','payment-confirmation.js']){
   const s=read(file);
   assert.match(s,/same.day/i,file);
   assert.match(s,/24–72 hours/,file);
