@@ -19,6 +19,7 @@ export function createHandler({openStore=productionStore,now=()=>Date.now()}={})
  if(claim?.tokenHash!==sha(token))return reply(403,{error:'Invalid submission'});
  if(now()-claim.at>86400000)return reply(410,{error:'Upload expired. Reload and try again.'});
  const existing=await store.get('submissions/'+id,{type:'json'});
+ if(url.searchParams.get('receipt')==='1')return existing?reply(200,{received:true,reference:'RMI-'+id,checkout:checkout(id,existing.email)}):reply(404,{received:false});
  if(url.searchParams.has('part')){
  if(existing)return reply(409,{error:'Already submitted'});
  const part=Number(url.searchParams.get('part')),file=url.searchParams.get('file');
